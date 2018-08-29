@@ -1,9 +1,16 @@
+package lib_6981;
+
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 public class Robot {
+
+    public static String TAG = "ROBOT";
+
     private static Robot currInstance;
 
     public static Robot getInstance() {
@@ -28,8 +35,13 @@ public class Robot {
                 }).start();
             }
             new Thread(() -> {
-                while (l.getCount() != 0);
-                flags.add(endTag);
+                try {
+                    l.await();
+                    flags.add(endTag);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                    Log.e(TAG,"parallelProcess: Failed to await latch");
+                }
             }).start();
     }
 
