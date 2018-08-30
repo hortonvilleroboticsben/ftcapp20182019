@@ -9,6 +9,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class Robot {
 
+    //THIS IS BEN
+
     public static String TAG = "ROBOT";
 
     private static Robot currInstance;
