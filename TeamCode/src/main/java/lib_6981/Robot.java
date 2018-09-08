@@ -2,6 +2,8 @@ package lib_6981;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,11 +17,14 @@ public class Robot {
 
     private static Robot currInstance;
 
-    public static Robot getInstance() {
-        return currInstance == null ? currInstance = new Robot() : currInstance;
+    public static Robot getInstance(LinearOpMode opMode) {
+        currInstance = currInstance == null ? new Robot() : currInstance;
+        currInstance.opMode = opMode;
+        return currInstance;
     }
 
     List<String> flags = new CopyOnWriteArrayList<>();
+    LinearOpMode opMode = null;
 
     interface Task {
         void executeTasks();
@@ -29,22 +34,24 @@ public class Robot {
     }
 
     public void parallelProcess(String endTag, Task... tasks) {
-            CountDownLatch l = new CountDownLatch(tasks.length);
-            for (Task t : tasks) {
-                new Thread(() -> {
-                    t.executeTasks();
-                    l.countDown();
-                }).start();
-            }
+        CountDownLatch l = new CountDownLatch(tasks.length);
+        for (Task t : tasks) {
             new Thread(() -> {
-                try {
-                    l.await();
-                    flags.add(endTag);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                    Log.e(TAG,"parallelProcess: Failed to await latch");
-                }
+                t.executeTasks();
+                l.countDown();
             }).start();
+        }
+        new Thread(() -> {
+            try {
+                l.await();
+                flags.add(endTag);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+                Log.e(TAG, "parallelProcess: Failed to await latch");
+            }
+        }).start();
+
+
     }
 
     public void waitForFlag(String flag) {
@@ -58,7 +65,7 @@ public class Robot {
     }
 
     public static void main(String[] args) {
-        Robot r = Robot.getInstance();
+        Robot r = new Robot();
         for (int j = 0; j < 1000; j++) {
             r.parallelProcess("Breads", (() -> {
 //            try{Thread.sleep(0);}catch(Exception e){}
