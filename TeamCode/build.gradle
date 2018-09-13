@@ -15,11 +15,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    compileSdkVersion 19
 }
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile 'org.boofcv:boofcv-all:0.30'
+    //    implementation 'org.boofcv:boofcv-all:0.30'
 }
