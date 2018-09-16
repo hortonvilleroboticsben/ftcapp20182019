@@ -5,6 +5,7 @@ import com.hortonvillerobotics.RobotConfiguration;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -25,7 +26,7 @@ public class Robot {
 
     public static Robot getInstance(LinearOpMode opMode) {
         currInstance = currInstance == null ? new Robot(opMode) : currInstance;
-
+        Robot.opMode = opMode;
         return currInstance;
     }
 
@@ -34,41 +35,58 @@ public class Robot {
     Map<String,HardwareDevice> sensors;
 
     List<String> flags = new CopyOnWriteArrayList<>();
-    private OpMode opMode = null;
+    public static OpMode opMode = null;
 
     interface Task {
         void executeTasks();
     }
 
     private Robot(OpMode opMode) {
-        currInstance.opMode = opMode;
-        initialize();
+        initialize(opMode);
     }
 
-    public void initialize() {
-        for(String motor : RobotConfiguration.motors) {
+    public void initialize(OpMode opMode) {
+
+        motors = new HashMap<>();
+        servos = new HashMap<>();
+        sensors = new HashMap<>();
+
+        for(String motorName : RobotConfiguration.motors) {
             try {
-                motors.put(motor, (DcMotor) opMode.hardwareMap.get(motor));
+                DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
+
+                motor.resetDeviceConfigurationForOpMode();
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                if(motorName.equals("mtrLeftDrive")) {
+                    motor.setDirection(DcMotorSimple.Direction.REVERSE);
+                }
+
+                motors.put(motorName, motor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add motor: " + motor);
+                Log.e(TAG,"Failed to add motor: " + motorName);
                 e.printStackTrace();
             }
         }
 
-        for(String servo : RobotConfiguration.servos) {
+        for(String servoName : RobotConfiguration.servos) {
             try {
-                servos.put(servo, (Servo) opMode.hardwareMap.get(servo));
+                Servo servo = (Servo) opMode.hardwareMap.get(servoName);
+                servo.resetDeviceConfigurationForOpMode();
+                servos.put(servoName, servo);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add servo: " + servo);
+                Log.e(TAG,"Failed to add servo: " + servoName);
                 e.printStackTrace();
             }
         }
 
-        for(String sensor : RobotConfiguration.sensors) {
+        for(String sensorName : RobotConfiguration.sensors) {
             try {
-                sensors.put(sensor, opMode.hardwareMap.get(sensor));
+                HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
+                sensor.resetDeviceConfigurationForOpMode();
+                sensors.put(sensorName, sensor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add sensor: " + sensor);
+                Log.e(TAG,"Failed to add sensor: " + sensorName);
                 e.printStackTrace();
             }
         }
@@ -128,12 +146,15 @@ public class Robot {
         }
 
         //EXIT DRIVE IF EITHER MOTOR IS NULL
-        if(nullMotorError) return;
+        if(nullMotorError) {
+            opMode.telemetry.addData("Drive","Exiting drive due to null motor");
+            return;
+        }
 
         double wheelRotations = distance / RobotConfiguration.wheelCircumference;
-        double motorRotations = wheelRotations / RobotConfiguration.driveTrainMotorGearRatio;
 
-        int targetEncoderCounts = ((int)motorRotations) * 1120;
+        int targetEncoderCounts = (int)(wheelRotations * RobotConfiguration.countsPerRotation);
+        Log.i(TAG,"drive: Target counts: "+targetEncoderCounts);
 
         mtrLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         mtrLeftDrive.setTargetPosition(targetEncoderCounts);
@@ -147,14 +168,21 @@ public class Robot {
 
         while(((LinearOpMode)opMode).opModeIsActive() && !targetReached) {
 
-            if(mtrLeftDrive.getCurrentPosition() > targetEncoderCounts) {
+            Log.d(TAG,"drive: current right count: " + mtrRightDrive.getCurrentPosition());
+            Log.d(TAG,"drive: current left count: " + mtrLeftDrive.getCurrentPosition());
+
+            if(Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts) {
                 mtrLeftDrive.setPower(0);
                 leftReached = true;
+            } else {
+                mtrLeftDrive.setPower(power);
             }
 
-            if(mtrRightDrive.getCurrentPosition() > targetEncoderCounts) {
+            if(Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts) {
                 mtrRightDrive.setPower(0);
                 rightReached = true;
+            } else {
+                mtrRightDrive.setPower(power);
             }
 
             if(leftReached && rightReached) {
@@ -167,6 +195,7 @@ public class Robot {
             mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             Log.v(TAG,"drive: Successfully drove to target of " + distance + " inches");
         } else {
+            Log.e(TAG,"drive: Opmode status is: "+((LinearOpMode) opMode).opModeIsActive());
             Log.e(TAG,"drive: OpMode aborted prior to reaching target of " + distance + " inches");
         }
 
