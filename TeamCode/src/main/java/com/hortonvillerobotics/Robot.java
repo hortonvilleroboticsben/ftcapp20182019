@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,7 +27,8 @@ public class Robot {
 
     public static Robot getInstance(LinearOpMode opMode) {
         currInstance = currInstance == null ? new Robot(opMode) : currInstance;
-        Robot.opMode = opMode;
+        currInstance.opMode = opMode;
+
         return currInstance;
     }
 
@@ -35,7 +37,7 @@ public class Robot {
     Map<String,HardwareDevice> sensors;
 
     List<String> flags = new CopyOnWriteArrayList<>();
-    public static OpMode opMode = null;
+    public OpMode opMode = null;
 
     interface Task {
         void executeTasks();
@@ -51,42 +53,47 @@ public class Robot {
         servos = new HashMap<>();
         sensors = new HashMap<>();
 
-        for(String motorName : RobotConfiguration.motors) {
+        for(String[] motorData : RobotConfiguration.motors) {
             try {
+                String motorName = motorData[0];
                 DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
 
                 motor.resetDeviceConfigurationForOpMode();
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                if(motorName.equals("mtrLeftDrive")) {
+                if(motorData[1].equals("reverse")) {
                     motor.setDirection(DcMotorSimple.Direction.REVERSE);
+                } else {
+                    motor.setDirection(DcMotorSimple.Direction.FORWARD);
                 }
 
                 motors.put(motorName, motor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add motor: " + motorName);
+                Log.e(TAG,"Failed to add motor: " + motorData[0]);
                 e.printStackTrace();
             }
         }
 
-        for(String servoName : RobotConfiguration.servos) {
+        for(String[] servoData : RobotConfiguration.servos) {
             try {
+                String servoName = servoData[0];
                 Servo servo = (Servo) opMode.hardwareMap.get(servoName);
                 servo.resetDeviceConfigurationForOpMode();
                 servos.put(servoName, servo);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add servo: " + servoName);
+                Log.e(TAG,"Failed to add servo: " + servoData[0]);
                 e.printStackTrace();
             }
         }
 
-        for(String sensorName : RobotConfiguration.sensors) {
+        for(String[] sensorData : RobotConfiguration.sensors) {
             try {
+                String sensorName = sensorData[0];
                 HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                 sensor.resetDeviceConfigurationForOpMode();
                 sensors.put(sensorName, sensor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add sensor: " + sensorName);
+                Log.e(TAG,"Failed to add sensor: " + sensorData[0]);
                 e.printStackTrace();
             }
         }
@@ -130,6 +137,8 @@ public class Robot {
     public void drive(double distance) {
         drive(distance,0.72);
     }
+
+
     public void drive(double distance, double power) {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
 
@@ -199,6 +208,12 @@ public class Robot {
             Log.e(TAG,"drive: OpMode aborted prior to reaching target of " + distance + " inches");
         }
 
+    }
+
+    public void finish() {
+        for (DcMotor motor : motors.values()) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
 
 
