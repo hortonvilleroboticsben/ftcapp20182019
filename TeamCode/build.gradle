@@ -18,5 +18,4 @@ android {
     compileSdkVersion 19
 }
 dependencies {
-    //    implementation 'org.boofcv:boofcv-all:0.30'
 }
