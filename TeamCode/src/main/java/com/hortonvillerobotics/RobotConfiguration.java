@@ -7,9 +7,8 @@ public class RobotConfiguration {
     public static double countsPerRotation = 1120;
 
     public static String[][] motors = {
-            {"mtrLeftDrive","reverse"},
-            {"mtrRightDrive","forward"},
-            {"thisMotorShouldntWork","forward"}
+            {"mtrLeftDrive","forward"},
+            {"mtrRightDrive","reverse"}
     };
     public static String[][] servos = {
 
