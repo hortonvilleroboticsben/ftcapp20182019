@@ -334,7 +334,7 @@ public class Robot {
 
         double wheelRotations = (turnCircumference / RobotConfiguration.wheelCircumference) * (Math.abs(degrees) / 360);
 
-        int targetEncoderCounts = (int) (wheelRotations * RobotConfiguration.countsPerRotation);
+        int targetEncoderCounts = (int) (wheelRotations * RobotConfiguration.countsPerRotation * Math.signum(power));
 
         Log.i(TAG, "owturn: Target counts: " + targetEncoderCounts);
 
@@ -345,12 +345,17 @@ public class Robot {
 
         if (degrees > 0) {
 
+            if(power < 0) {
+                Log.i(TAG,"owturn: power less than 0");
+            }
+
             mtrRightDrive.setTargetPosition(targetEncoderCounts);
             mtrRightDrive.setPower(power);
 
             while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
 
                 Log.d(TAG, "owturn: current right count: " + mtrRightDrive.getCurrentPosition());
+                Log.d(TAG, "owturn: current right power: " + mtrRightDrive.getPower());
 
                 if (Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
                     mtrRightDrive.setPower(0);
@@ -363,12 +368,18 @@ public class Robot {
 
         } else {
 
+            if(power < 0) {
+                Log.i(TAG,"owturn: power less than 0");
+            }
+
             mtrLeftDrive.setTargetPosition(targetEncoderCounts);
             mtrLeftDrive.setPower(power);
 
             while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
 
                 Log.d(TAG, "owturn: current left count: " + mtrLeftDrive.getCurrentPosition());
+                Log.d(TAG, "owturn: current left power: " + mtrLeftDrive.getPower());
+
 
                 if (Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
                     mtrLeftDrive.setPower(0);
