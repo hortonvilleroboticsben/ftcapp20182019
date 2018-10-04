@@ -26,6 +26,7 @@ public class Robot {
 
     private static Robot currInstance;
 
+
     public static Robot getInstance(LinearOpMode opMode) {
         currInstance = currInstance == null ? new Robot(opMode) : currInstance;
         currInstance.opMode = opMode;
