@@ -1,4 +1,5 @@
 package com.hortonvillerobotics;
+
 import android.util.Log;
 
 import com.hortonvillerobotics.RobotConfiguration;
@@ -27,6 +28,7 @@ public class Robot {
 
     private static Robot currInstance;
 
+
     public static Robot getInstance(LinearOpMode opMode) {
         currInstance = currInstance == null ? new Robot(opMode) : currInstance;
         currInstance.opMode = opMode;
@@ -34,9 +36,9 @@ public class Robot {
         return currInstance;
     }
 
-    Map<String,DcMotor> motors;
-    Map<String,Servo> servos;
-    Map<String,HardwareDevice> sensors;
+    Map<String, DcMotor> motors;
+    Map<String, Servo> servos;
+    Map<String, HardwareDevice> sensors;
 
     List<String> flags = new CopyOnWriteArrayList<>();
     public OpMode opMode = null;
@@ -55,15 +57,16 @@ public class Robot {
         servos = new HashMap<>();
         sensors = new HashMap<>();
 
-        for(String[] motorData : RobotConfiguration.motors) {
+        for (String[] motorData : RobotConfiguration.motors) {
             try {
                 String motorName = motorData[0];
                 DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
 
                 motor.resetDeviceConfigurationForOpMode();
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                if(motorData[1].equals("reverse")) {
+                if (motorData[1].equals("reverse")) {
                     motor.setDirection(DcMotorSimple.Direction.REVERSE);
                 } else {
                     motor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -71,31 +74,31 @@ public class Robot {
 
                 motors.put(motorName, motor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add motor: " + motorData[0]);
+                Log.e(TAG, "Failed to add motor: " + motorData[0]);
                 e.printStackTrace();
             }
         }
 
-        for(String[] servoData : RobotConfiguration.servos) {
+        for (String[] servoData : RobotConfiguration.servos) {
             try {
                 String servoName = servoData[0];
                 Servo servo = (Servo) opMode.hardwareMap.get(servoName);
                 servo.resetDeviceConfigurationForOpMode();
                 servos.put(servoName, servo);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add servo: " + servoData[0]);
+                Log.e(TAG, "Failed to add servo: " + servoData[0]);
                 e.printStackTrace();
             }
         }
 
-        for(String[] sensorData : RobotConfiguration.sensors) {
+        for (String[] sensorData : RobotConfiguration.sensors) {
             try {
                 String sensorName = sensorData[0];
                 HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                 sensor.resetDeviceConfigurationForOpMode();
                 sensors.put(sensorName, sensor);
             } catch (Exception e) {
-                Log.e(TAG,"Failed to add sensor: " + sensorData[0]);
+                Log.e(TAG, "Failed to add sensor: " + sensorData[0]);
                 e.printStackTrace();
             }
         }
@@ -137,35 +140,34 @@ public class Robot {
     //----ROBOT FUNCTIONS BEGIN----//
 
     public void drive(double distance) {
-        drive(distance,0.72);
+        drive(distance, 0.72);
     }
-
 
     public void drive(double distance, double power) {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
 
         boolean nullMotorError = false;
 
-        if(mtrLeftDrive == null) {
-            Log.e(TAG,"Left Drive Motor is null");
+        if (mtrLeftDrive == null) {
+            Log.e(TAG, "Left Drive Motor is null");
             nullMotorError = true;
         }
 
-        if(mtrRightDrive == null) {
-            Log.e(TAG,"Right Drive Motor is null");
+        if (mtrRightDrive == null) {
+            Log.e(TAG, "Right Drive Motor is null");
             nullMotorError = true;
         }
 
         //EXIT DRIVE IF EITHER MOTOR IS NULL
-        if(nullMotorError) {
-            opMode.telemetry.addData("Drive","Exiting drive due to null motor");
+        if (nullMotorError) {
+            opMode.telemetry.addData("Drive", "Exiting drive due to null motor");
             return;
         }
 
         double wheelRotations = distance / RobotConfiguration.wheelCircumference;
 
-        int targetEncoderCounts = (int)(wheelRotations * RobotConfiguration.countsPerRotation);
-        Log.i(TAG,"drive: Target counts: "+targetEncoderCounts);
+        int targetEncoderCounts = (int) (wheelRotations * RobotConfiguration.countsPerRotation);
+        Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
 
         mtrLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         mtrLeftDrive.setTargetPosition(targetEncoderCounts);
@@ -177,42 +179,236 @@ public class Robot {
 
         boolean targetReached = false, leftReached = false, rightReached = false;
 
-        while(((LinearOpMode)opMode).opModeIsActive() && !targetReached) {
+        while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
 
-            Log.d(TAG,"drive: current right count: " + mtrRightDrive.getCurrentPosition());
-            Log.d(TAG,"drive: current left count: " + mtrLeftDrive.getCurrentPosition());
+            Log.d(TAG, "drive: current right count: " + mtrRightDrive.getCurrentPosition());
+            Log.d(TAG, "drive: current left count: " + mtrLeftDrive.getCurrentPosition());
 
-            if(Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts) {
+            if (Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
                 mtrLeftDrive.setPower(0);
                 leftReached = true;
-            } else {
-                mtrLeftDrive.setPower(power);
             }
 
-            if(Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts) {
+            if (Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
                 mtrRightDrive.setPower(0);
                 rightReached = true;
-            } else {
-                mtrRightDrive.setPower(power);
             }
 
-            if(leftReached && rightReached) {
+            if (leftReached && rightReached) {
                 targetReached = true;
             }
         }
 
-        if(targetReached) {
+        if (targetReached) {
             mtrLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            Log.v(TAG,"drive: Successfully drove to target of " + distance + " inches");
+            Log.v(TAG, "drive: Successfully drove to target of " + distance + " inches");
         } else {
-            Log.e(TAG,"drive: Opmode status is: "+((LinearOpMode) opMode).opModeIsActive());
-            Log.e(TAG,"drive: OpMode aborted prior to reaching target of " + distance + " inches");
+            Log.e(TAG, "drive: Opmode status is: " + ((LinearOpMode) opMode).opModeIsActive());
+            Log.e(TAG, "drive: OpMode aborted prior to reaching target of " + distance + " inches");
         }
 
     }
 
+
+    //TURN WITH DEFAULT POWER
+    public void turn(double degrees) {
+        turn(degrees, 0.4);
+    }
+
+    //TURN WITH SPECIFIED POWER
+    public void turn(double degrees, double power) {
+        DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
+
+        boolean nullMotorError = false;
+
+        if (mtrLeftDrive == null) {
+            Log.e(TAG, "Left Drive Motor is null");
+            nullMotorError = true;
+        }
+
+        if (mtrRightDrive == null) {
+            Log.e(TAG, "Right Drive Motor is null");
+            nullMotorError = true;
+        }
+
+        //EXIT TURN IF EITHER MOTOR IS NULL
+        if (nullMotorError) {
+            opMode.telemetry.addData("Turn", "Exiting turn due to null motor");
+            return;
+        }
+
+        double turnCircumference = RobotConfiguration.turnDiameter * Math.PI;
+
+        double wheelRotations = (turnCircumference / RobotConfiguration.wheelCircumference) * (Math.abs(degrees) / 360);
+
+        int targetEncoderCounts = (int) (wheelRotations * RobotConfiguration.countsPerRotation);
+
+        Log.i(TAG, "turn: Target counts: " + targetEncoderCounts);
+
+        mtrLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        mtrRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        double leftPower, rightPower;
+
+        if (degrees > 0) {
+
+            mtrLeftDrive.setTargetPosition(-targetEncoderCounts);
+            mtrRightDrive.setTargetPosition(targetEncoderCounts);
+
+            leftPower = power;
+            rightPower = power;
+
+            mtrLeftDrive.setPower(leftPower);
+            mtrRightDrive.setPower(rightPower);
+
+        } else {
+
+            mtrLeftDrive.setTargetPosition(targetEncoderCounts);
+            mtrRightDrive.setTargetPosition(-targetEncoderCounts);
+
+            leftPower = power;
+            rightPower = power;
+
+            mtrLeftDrive.setPower(leftPower);
+            mtrRightDrive.setPower(rightPower);
+
+        }
+
+        boolean targetReached = false, leftReached = false, rightReached = false;
+
+        while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
+
+            Log.d(TAG, "turn: current right count: " + mtrRightDrive.getCurrentPosition());
+            Log.d(TAG, "turn: current left count: " + mtrLeftDrive.getCurrentPosition());
+
+            if (Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
+                mtrLeftDrive.setPower(0);
+                leftReached = true;
+            } else {
+                mtrLeftDrive.setPower(leftPower);
+            }
+
+            if (Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
+                mtrRightDrive.setPower(0);
+                rightReached = true;
+            } else {
+                mtrRightDrive.setPower(rightPower);
+            }
+
+            if (leftReached && rightReached) {
+                targetReached = true;
+            }
+        }
+
+        if (targetReached) {
+            mtrLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Log.v(TAG, "turn: Successfully turned to target of " + degrees + " degrees");
+        } else {
+            Log.e(TAG, "turn: Opmode status is: " + ((LinearOpMode) opMode).opModeIsActive());
+            Log.e(TAG, "turn: OpMode aborted prior to reaching target of " + degrees + " degrees");
+        }
+    }
+
+
+    public void owTurn(double degrees, double power) {
+        DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
+
+        boolean nullMotorError = false;
+
+        if (mtrLeftDrive == null) {
+            Log.e(TAG, "Left Drive Motor is null");
+            nullMotorError = true;
+        }
+
+        if (mtrRightDrive == null) {
+            Log.e(TAG, "Right Drive Motor is null");
+            nullMotorError = true;
+        }
+
+        //EXIT TURN IF EITHER MOTOR IS NULL
+        if (nullMotorError) {
+            opMode.telemetry.addData("OwTurn", "Exiting owturn due to null motor");
+            return;
+        }
+
+        double turnCircumference = 2 * RobotConfiguration.turnDiameter * Math.PI;
+
+        double wheelRotations = (turnCircumference / RobotConfiguration.wheelCircumference) * (Math.abs(degrees) / 360);
+
+        int targetEncoderCounts = (int) (wheelRotations * RobotConfiguration.countsPerRotation * Math.signum(power));
+
+        Log.i(TAG, "owturn: Target counts: " + targetEncoderCounts);
+
+        mtrLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        mtrRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        boolean targetReached = false;
+
+        if (degrees > 0) {
+
+            if(power < 0) {
+                Log.i(TAG,"owturn: power less than 0");
+            }
+
+            mtrRightDrive.setTargetPosition(targetEncoderCounts);
+            mtrRightDrive.setPower(power);
+
+            while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
+
+                Log.d(TAG, "owturn: current right count: " + mtrRightDrive.getCurrentPosition());
+                Log.d(TAG, "owturn: current right power: " + mtrRightDrive.getPower());
+
+                if (Math.abs(mtrRightDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
+                    mtrRightDrive.setPower(0);
+                    targetReached = true;
+                } else {
+                    mtrRightDrive.setPower(power);
+                }
+
+            }
+
+        } else {
+
+            if(power < 0) {
+                Log.i(TAG,"owturn: power less than 0");
+            }
+
+            mtrLeftDrive.setTargetPosition(targetEncoderCounts);
+            mtrLeftDrive.setPower(power);
+
+            while (((LinearOpMode) opMode).opModeIsActive() && !targetReached) {
+
+                Log.d(TAG, "owturn: current left count: " + mtrLeftDrive.getCurrentPosition());
+                Log.d(TAG, "owturn: current left power: " + mtrLeftDrive.getPower());
+
+
+                if (Math.abs(mtrLeftDrive.getCurrentPosition()) >= targetEncoderCounts - 20) {
+                    mtrLeftDrive.setPower(0);
+                    targetReached = true;
+                } else {
+                    mtrLeftDrive.setPower(power);
+                }
+
+            }
+
+        }
+
+
+        if (targetReached) {
+            mtrLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Log.v(TAG, "owturn: Successfully turned to target of " + degrees + " degrees");
+        } else {
+            Log.e(TAG, "owturn: Opmode status is: " + ((LinearOpMode) opMode).opModeIsActive());
+            Log.e(TAG, "owturn: OpMode aborted prior to reaching target of " + degrees + " degrees");
+        }
+    }
+
+
     public void finish() {
+        Log.i(TAG, "finish: entering finish phase");
         for (DcMotor motor : motors.values()) {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
