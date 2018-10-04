@@ -21,6 +21,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class Robot {
 
+    //test
+
     public static String TAG = "ROBOT";
 
     private static Robot currInstance;
