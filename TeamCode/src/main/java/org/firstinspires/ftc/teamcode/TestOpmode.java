@@ -23,26 +23,15 @@ public class TestOpmode extends LinearOpMode {
 
             waitForStart();
 
-            for(int i = 0; i < 4; i ++) {
-                robot.owTurn(90,0.5);
-                sleep(1000);
-            }
+            robot.owTurn(90,.2);
+            robot.pause(2000);
+            robot.owTurn(90,-.2);
+            robot.pause(2000);
+            robot.owTurn(-90,.2);
+            robot.pause(2000);
+            robot.owTurn(-90,-.2);
 
-            for(int i = 0; i < 4; i ++) {
-                robot.owTurn(90,-0.5);
-                sleep(1000);
-            }
 
-            for(int i = 0; i < 4; i ++) {
-                robot.owTurn(-90,0.5);
-                sleep(1000);
-            }
-
-            for(int i = 0; i < 3; i ++) {
-                robot.owTurn(-90,-0.5);
-                sleep(1000);
-            }
-            robot.owTurn(-90,-0.5);
 
             robot.finish();
         } catch (Exception e) {
