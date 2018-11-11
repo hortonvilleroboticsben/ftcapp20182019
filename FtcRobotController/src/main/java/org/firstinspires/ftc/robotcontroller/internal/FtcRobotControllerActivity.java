@@ -40,6 +40,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.Camera;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
@@ -53,8 +54,10 @@ import android.support.annotation.StringRes;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -95,6 +98,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.wifi.NetworkConnection;
 import com.qualcomm.robotcore.wifi.NetworkConnectionFactory;
 import com.qualcomm.robotcore.wifi.NetworkType;
+import com.vuforia.Frame;
 
 import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
@@ -153,6 +157,8 @@ public class FtcRobotControllerActivity extends Activity
   protected TextView textOpMode;
   protected TextView textErrorMessage;
   protected ImmersiveMode immersion;
+  public static FrameLayout cameraView;
+  public static CameraPreview cp;
 
   protected UpdateUI updateUI;
   protected Dimmer dimmer;
@@ -309,6 +315,9 @@ public class FtcRobotControllerActivity extends Activity
     immersion = new ImmersiveMode(getWindow().getDecorView());
     dimmer = new Dimmer(this);
     dimmer.longBright();
+    cameraView = (FrameLayout) (findViewById(R.id.cameraMonitorViewId).getParent());
+    cp = new CameraPreview(this, Camera.open(0));
+    cameraView.addView(cp);
 
     programmingWebHandlers = new ProgrammingWebHandlers();
     programmingModeController = new ProgrammingModeControllerImpl(

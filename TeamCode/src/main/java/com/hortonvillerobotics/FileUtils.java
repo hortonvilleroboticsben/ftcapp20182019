@@ -14,7 +14,7 @@ public class FileUtils {
             File f = new File(Environment.getExternalStorageDirectory() + fileName);
             checkFileExistence(f);
             OutputStream o = new FileOutputStream(f,false);
-            o.write(contents.toString().getBytes());
+            o.write(contents instanceof byte[] ? (byte[])contents : contents.toString().getBytes());
             o.flush();
             o.close();
         }catch(Exception e){e.printStackTrace();}
@@ -25,7 +25,7 @@ public class FileUtils {
             File f = new File(Environment.getExternalStorageDirectory() + fileName);
             checkFileExistence(f);
             OutputStream o = new FileOutputStream(f, true);
-            byte[] b = contents.toString().getBytes();
+            byte[] b = contents instanceof byte[] ? (byte[])contents : contents.toString().getBytes();
             o.write(b);
             o.flush();
             o.close();

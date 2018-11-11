@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.hortonvillerobotics.Robot;
+import com.hortonvillerobotics.RobotConfiguration;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import com.hortonvillerobotics.FileUtils;
 
@@ -15,7 +15,9 @@ public class DriveRecorder extends LinearOpMode {
     public static final double TURN_DIAMETER = 18;
     public static final double ENC_COUNTS_PER_ROTATION = 1120;
     public static final double STD_POWER = 0.2;
-    public int lock = -1;
+    public int lockA = -1;
+    public int lockB = -1;
+    Robot r;
 
     public static final String FILENAME = "/opMode_Drive.java";
 
@@ -24,36 +26,14 @@ public class DriveRecorder extends LinearOpMode {
     }
 
     public double backDrive_Turn(double encCounts){
-        return Math.round(encCounts/GEAR_RATIO/ENC_COUNTS_PER_ROTATION*WHEEL_DIAMETER*Math.PI/TURN_DIAMETER/Math.PI*360*Math.signum(getEncoderCount(mtrLeftDrive))*100)/100;
-    }
-
-    DcMotor mtrLeftDrive;
-    DcMotor mtrRightDrive;
-
-    void resetDriveEncoders(){
-        mtrLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        mtrRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    void setDrivePower(double a, double b){
-        mtrLeftDrive.setPower(a);
-        mtrRightDrive.setPower(b);
-    }
-
-    double getEncoderCount(DcMotor m){
-        return m.getCurrentPosition();
+        return Math.round(encCounts/GEAR_RATIO/ENC_COUNTS_PER_ROTATION*WHEEL_DIAMETER*Math.PI/TURN_DIAMETER/Math.PI*360*Math.signum(r.getEncoderCounts("mtrLeftDrive"))*100)/100;
     }
 
 
     public void runOpMode() throws InterruptedException {
 
-        mtrLeftDrive = hardwareMap.dcMotor.get("mtrLeftDrive");
-        mtrRightDrive = hardwareMap.dcMotor.get("mtrRightDrive");
-        mtrRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        mtrLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        mtrRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        r = Robot.getInstance(this,new RobotConfiguration());
+        r.initialize(this,new RobotConfiguration());
 
         FileUtils.writeToFile(FILENAME, "package org.firstinspires.ftc.teamcode;\n" +
                 "\n" +
@@ -70,53 +50,78 @@ public class DriveRecorder extends LinearOpMode {
                 "       while(!opModeIsActive()){}\n"+
                 "\n");
 
-        resetDriveEncoders();
+        r.resetDriveEncoders();
 
         while(!opModeIsActive()){}
 
         while(opModeIsActive()){
-            lock = lock == -1 ? Math.abs(gamepad1.left_stick_y) >= 0.05 ? 1 : Math.abs(gamepad1.right_stick_x) >= 0.05 ? 0 : -1 : lock;
+            lockA = lockA == -1 && lockB == -1 ? Math.abs(gamepad1.left_stick_y) >= 0.05 ? 1 : Math.abs(gamepad1.right_stick_x) >= 0.05 ? 0 : -1 : lockA;
+            lockB = lockA == -1 && lockB == -1 ? Math.abs(gamepad2.left_stick_y) >= 0.05 ? 1 : Math.abs(gamepad2.right_stick_y) >= 0.05 ? 0 : -1 : lockB;
 
-            switch(lock) {
-                case 1:
-                    setDrivePower(gamepad1.left_stick_y, gamepad1.left_stick_y);
-                    break;
-                case 0:
-                    setDrivePower(gamepad1.right_stick_x, -gamepad1.right_stick_x);
-                    break;
-            }
-
-            if(lock != -1 && gamepad1.a){
-                switch(lock){
-                    case 0:
-                        FileUtils.appendToFile(FILENAME, "      robot.Turn("+backDrive_Turn(-(Math.abs(getEncoderCount(mtrLeftDrive))+Math.abs(getEncoderCount(mtrRightDrive)))/2)+", "+STD_POWER+");\n");
-                        break;
+            if(lockA != -1)
+                switch(lockA) {
                     case 1:
-                        FileUtils.appendToFile(FILENAME, "      robot.Drive("+backDrive_Drive(Math.signum(getEncoderCount(mtrLeftDrive))*(Math.abs(getEncoderCount(mtrLeftDrive))+Math.abs(getEncoderCount(mtrRightDrive)))/2)+", "+STD_POWER+");\n");
+                        r.setDrivePower(gamepad1.left_stick_y, gamepad1.left_stick_y);
+                        break;
+                    case 0:
+                        r.setDrivePower(gamepad1.right_stick_x, -gamepad1.right_stick_x);
                         break;
                 }
-                resetDriveEncoders();
-                lock = -1;
+
+            if(lockB != -1)
+                switch (lockB){
+                    case 1:
+                        r.setDrivePower(gamepad2.left_stick_y, 0);
+                        break;
+                    case 0:
+                        r.setDrivePower(0, gamepad2.right_stick_y);
+                        break;
+                }
+
+            if(lockA != -1 && gamepad1.a && !gamepad1.start){
+                switch(lockA){
+                    case 0:
+                        FileUtils.appendToFile(FILENAME, "      robot.Turn("+backDrive_Turn(-(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
+                        break;
+                    case 1:
+                        FileUtils.appendToFile(FILENAME, "      robot.Drive("+backDrive_Drive(Math.signum(r.getEncoderCounts("mtrLeftDrive"))*(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
+                        break;
+                }
+                r.resetDriveEncoders();
+                lockA = -1;
             }
 
-            telemetry.addData("LEnc", getEncoderCount(mtrLeftDrive));
-            telemetry.addData("REnc", getEncoderCount(mtrRightDrive));
-            telemetry.addData("Lock", lock);
+            if(lockB != -1 && gamepad2.a && !gamepad2.start&& !gamepad1.start){
+                switch(lockB){
+                    case 0:
+                        FileUtils.appendToFile(FILENAME, "      robot.owTurn("+backDrive_Turn(-(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
+                        break;
+                    case 1:
+                        FileUtils.appendToFile(FILENAME, "      robot.owTurn("+backDrive_Drive(Math.signum(r.getEncoderCounts("mtrLeftDrive"))*(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
+                        break;
+                }
+                r.resetDriveEncoders();
+                lockB = -1;
+            }
+
+            telemetry.addData("LEnc", r.getEncoderCounts("mtrLeftDrive"));
+            telemetry.addData("REnc", r.getEncoderCounts("mtrRightDrive"));
+            telemetry.addData("Lock", lockA);
             telemetry.update();
 
         }
 
-        if(lock != -1){
-            switch(lock){
+        if(lockA != -1){
+            switch(lockA){
                 case 0:
-                    FileUtils.appendToFile(FILENAME, "      robot.Turn("+backDrive_Turn(-(Math.abs(getEncoderCount(mtrLeftDrive))+Math.abs(getEncoderCount(mtrRightDrive)))/2)+", "+STD_POWER+");\n");
+                    FileUtils.appendToFile(FILENAME, "      robot.Turn("+backDrive_Turn(-(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
                     break;
                 case 1:
-                    FileUtils.appendToFile(FILENAME, "      robot.Drive("+backDrive_Drive((-getEncoderCount(mtrLeftDrive)+getEncoderCount(mtrRightDrive))/2)+", "+STD_POWER+");\n");
+                    FileUtils.appendToFile(FILENAME, "      robot.Drive("+backDrive_Drive(Math.signum(r.getEncoderCounts("mtrLeftDrive"))*(Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n");
                     break;
             }
-            resetDriveEncoders();
-            lock = -1;
+            r.resetDriveEncoders();
+            lockA = -1;
         }
 
         FileUtils.appendToFile(FILENAME, "    }\n" +

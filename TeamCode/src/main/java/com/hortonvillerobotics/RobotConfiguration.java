@@ -6,14 +6,14 @@ public class RobotConfiguration {
     public static double turnDiameter = 14.5;
     public static double countsPerRotation = 1120;
 
-    public static String[][] motors = {
+    public String[][] motors = {
             {"mtrLeftDrive","forward"},
             {"mtrRightDrive","reverse"}
     };
-    public static String[][] servos = {
+    public String[][] servos = {
 
     };
-    public static String[][] sensors = {
+    public String[][] sensors = {
 
     };
 
