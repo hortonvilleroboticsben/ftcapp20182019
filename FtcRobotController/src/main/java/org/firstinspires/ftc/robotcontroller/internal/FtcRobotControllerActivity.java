@@ -317,6 +317,7 @@ public class FtcRobotControllerActivity extends Activity
     dimmer.longBright();
     cameraView = (FrameLayout) (findViewById(R.id.cameraMonitorViewId).getParent());
     cp = new CameraPreview(this, Camera.open(0));
+    cp.mCamera.setDisplayOrientation(90);
     cameraView.addView(cp);
 
     programmingWebHandlers = new ProgrammingWebHandlers();

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.hortonvillerobotics.DemoRobotConfiguration;
 import com.hortonvillerobotics.Robot;
+import com.hortonvillerobotics.RobotConfiguration;
 import com.hortonvillerobotics.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,24 +11,21 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import static com.hortonvillerobotics.Robot.getInstance;
+
 @TeleOp(name="DemoTeleOp",group = "Demo")
 public class DemoTeleOp extends LinearOpMode {
 
-    Robot r;
+    Robot<RobotConfiguration> r;
     Servo srvL, srvR;
     DcMotor mtrArm;
     boolean launching = false;
     Timer t = new Timer();
 
-    void parseXML(Object o){
-//        XmlPullParser x = new Pull;
-    }
-
 
     @Override
     public void runOpMode() throws InterruptedException {
         r = Robot.getInstance(this, new DemoRobotConfiguration());
-        r.initialize(this, new DemoRobotConfiguration());
 
         r.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        r.setServoPosition("srvRight", 1);

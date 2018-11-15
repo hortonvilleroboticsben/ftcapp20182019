@@ -1,16 +1,19 @@
 package com.hortonvillerobotics;
 
 public class DemoRobotConfiguration extends RobotConfiguration {
-    public String[][] motors = {
-            {"mtrLeftDrive","forward"},
-            {"mtrRightDrive","reverse"},
+    private static String[][] motors = {
+            {"mtrLeftDrive", "forward"},
+            {"mtrRightDrive", "reverse"},
             {"mtrArm", "forward"}
     };
-    public String[][] servos = {
-            {"srvLeft"},
-            {"srvRight"}
-    };
-    public String[][] sensors = {
+    private static String[][] servos = {
 
     };
+    private static String[][] sensors = {
+
+    };
+
+    public String[][] getMotors(){return motors;}
+    public String[][] getServos(){return servos;}
+    public String[][] getSensors(){return sensors;}
 }
