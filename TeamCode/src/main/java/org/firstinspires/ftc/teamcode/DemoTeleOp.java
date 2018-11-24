@@ -2,77 +2,84 @@ package org.firstinspires.ftc.teamcode;
 
 import com.hortonvillerobotics.DemoRobotConfiguration;
 import com.hortonvillerobotics.Robot;
-import com.hortonvillerobotics.RobotConfiguration;
+import com.hortonvillerobotics.StateMachine;
 import com.hortonvillerobotics.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.xmlpull.v1.XmlPullParser;
-
-import static com.hortonvillerobotics.Robot.getInstance;
 
 @TeleOp(name="DemoTeleOp",group = "Demo")
 public class DemoTeleOp extends LinearOpMode {
 
-    Robot<RobotConfiguration> r;
-    Servo srvL, srvR;
-    DcMotor mtrArm;
-    boolean launching = false;
-    Timer t = new Timer();
+    Robot r = Robot.getInstance(this, new DemoRobotConfiguration());
+    StateMachine s = new StateMachine();
+    boolean launching = false, launchOS = true;
+    double rightPos = 1, leftPos = 0;
+    Timer srvTimer = new Timer();
 
 
     @Override
     public void runOpMode() throws InterruptedException {
-        r = Robot.getInstance(this, new DemoRobotConfiguration());
+        r.initialize(this, new DemoRobotConfiguration());
 
         r.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        r.setServoPosition("srvRight", 1);
-//        r.setServoPosition("srvLeft", 0);
-
-        mtrArm = hardwareMap.dcMotor.get("mtrArm");
-        srvR = hardwareMap.servo.get("srvLeft");
-        srvL = hardwareMap.servo.get("srvRight");
-
-        srvL.setPosition(1);
-        srvR.setPosition(0);
-
-
         waitForStart();
 
-        while(opModeIsActive()){
-           r.setDrivePower(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
+        while (opModeIsActive()) {
+            r.setDrivePower((gamepad1.right_bumper ? 0.1 : 1)*-gamepad1.left_stick_y, -(gamepad1.right_bumper ? 0.1 : 1)*gamepad1.right_stick_y);
 
-           if(gamepad1.right_trigger >= 0.5) {
-//               r.setServoPosition("srvRight", .9);
-//               r.setServoPosition("srvLeft", .1);
-               srvR.setPosition(.9);
-               srvL.setPosition(.1);
-           }else{
-//               r.setServoPosition("srvRight", 1);
-//               r.setServoPosition("srvLeft", 0);
-               srvR.setPosition(1);
-               srvL.setPosition(0);
-           }
+            r.setServoPosition("srvRight", rightPos);
+            r.setServoPosition("srvLeft", leftPos);
 
+            if (gamepad1.left_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
+                rightPos = rightPos < 1 ? rightPos + 0.008 : 1;
+                leftPos = leftPos > 0 ? leftPos - 0.008 : 0;
+                srvTimer.reset();
+            } else if (gamepad1.right_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
+                rightPos = rightPos > 0 ? rightPos - 0.008 : 0;
+                leftPos = leftPos < 1 ? leftPos + 0.008 : 1;
+                srvTimer.reset();
+            }
 
+            if (gamepad1.a && !gamepad1.start && launchOS) {
+                launching = true;
+                launchOS = false;
+                s.state_in_progress = 1;
+            }
 
-           if((gamepad1.a && !gamepad1.start && !launching) || launching){
-               launching = true;
-//               r.runToTarget("mtrArm", -50, 0.2, true);
-//               if(Math.abs(r.motors.get("mtrArm").getCurrentPosition()) <= Math.abs(-50)) {
-//                   launching = false;
-//                   r.setPower("mtrArm", 0.0);
-//               }
-               mtrArm.setPower(1);
-               if(t.hasTimeElapsed(500)){
-                   mtrArm.setPower(0);
-                   launching = false;
-               }
+            if(!launching && !gamepad1.a && !gamepad1.start) launchOS = true;
 
-           } else t.reset();
+            if (launching) {
+                s.runStates(() -> {
+                    r.resetEncoder("mtrArm");
+                    s.state_in_progress++;
+                }, () -> {
+                    r.setPower("mtrArm", -1);
+                    if (r.hasMotorEncoderReached("mtrArm", -80)) {
+                        r.setPower("mtrArm", 0);
+                        r.resetEncoder("mtrArm");
+                        s.state_in_progress++;
+                    }
+                }, () -> {
+                    r.runToTarget("mtrArm", 97, -.12);
+                    if (r.hasMotorEncoderReached("mtrArm", 97)) {
+                        r.setPower("mtrArm", 0);
+                        r.setRunMode("mtrArm", DcMotor.RunMode.RUN_USING_ENCODER);
+                        launching = false;
+                        s.state_in_progress++;
+                    }
+                });
+                telemetry.addData("state", s.state_in_progress);
+            }
+
+            telemetry.addData("encoder", r.getEncoderCounts("mtrArm"));
+            telemetry.update();
+
 
         }
+
+        r.setServoPosition("srvRight", 1);
+        r.setServoPosition("srvLeft", 0);
+
     }
 }

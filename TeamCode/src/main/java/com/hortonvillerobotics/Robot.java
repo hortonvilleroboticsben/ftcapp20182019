@@ -65,7 +65,6 @@ public class Robot <T extends RobotConfiguration>{
                 DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
 
                 motor.resetDeviceConfigurationForOpMode();
-                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
                 if (motorData[1].equals("reverse")) {
@@ -74,6 +73,7 @@ public class Robot <T extends RobotConfiguration>{
                     motor.setDirection(DcMotorSimple.Direction.FORWARD);
                 }
 
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 motors.put(motorName, motor);
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add motor: " + motorData[0]);
@@ -84,9 +84,11 @@ public class Robot <T extends RobotConfiguration>{
         for (String[] servoData : config.getServos()) {
             try {
                 String servoName = servoData[0];
-                Servo servo = (Servo) opMode.hardwareMap.get(servoName);
-                servo.resetDeviceConfigurationForOpMode();
-                servos.put(servoName, servo);
+                if(servoData.length == 1 || !servoData[1].toLowerCase().equals("cr")) {
+                    Servo servo = (Servo) opMode.hardwareMap.get(servoName);
+                    servo.resetDeviceConfigurationForOpMode();
+                    servos.put(servoName, servo);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add servo: " + servoData[0]);
                 e.printStackTrace();
@@ -226,7 +228,7 @@ public class Robot <T extends RobotConfiguration>{
 
     @Nullable
     public boolean hasMotorEncoderReached(String m, int val){
-        return (motors.get(m) != null) ? Math.abs(getEncoderCounts(m)) <= Math.abs(val) : null;
+        return (motors.get(m) != null) ? Math.abs(getEncoderCounts(m)) >= Math.abs(val) : null;
     }
 
     //----ROBOT FUNCTIONS BEGIN----//
@@ -238,7 +240,7 @@ public class Robot <T extends RobotConfiguration>{
     }
 
     public void drive(double distance) {
-        drive(distance, 0.72);
+        drive(distance, 0.4);
     }
 
     public void drive(double distance, double power) {
