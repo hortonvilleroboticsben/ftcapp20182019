@@ -1,59 +1,60 @@
 package com.hortonvillerobotics;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.hortonvillerobotics.RobotConfiguration;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.wifi.RobotControllerAccessPointAssistant;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
-public class Robot <T extends RobotConfiguration>{
-    //test
+public class Robot<T extends RobotConfiguration> {
+    //this comment line is just so I can push
 
-    public static String TAG = "ROBOT";
+    public static String TAG = "ROBOTCLASS";
 
     private static Robot currInstance;
 
 
-    public static <T extends RobotConfiguration> Robot getInstance (OpMode opMode, T config) {
-        currInstance = currInstance == null ? new Robot<T>(opMode,config) : currInstance;
+    Telemetry telemetry;
+
+
+    public static <T extends RobotConfiguration> Robot getInstance(OpMode opMode, T config) {
+        currInstance = currInstance == null ? new Robot<T>(opMode, config) : currInstance;
         currInstance.opMode = opMode;
         currInstance.config = config;
         return currInstance;
     }
 
     public Map<String, DcMotor> motors;
-    public Map<String, Servo> servos;
+    public Map<String, HardwareDevice> servos;
     public Map<String, HardwareDevice> sensors;
 
     List<String> flags = new CopyOnWriteArrayList<>();
     public OpMode opMode = null;
     public T config = null;
 
-    interface Task {
+    public interface Task {
         void executeTasks();
     }
 
-    private  Robot(OpMode opMode, T config) {
+    private Robot(OpMode opMode, T config) {
         initialize(opMode, config);
     }
 
-    public void initialize (OpMode opMode, T config) {
+    public void initialize(@NonNull OpMode opMode, T config) {
 
         motors = new HashMap<>();
         servos = new HashMap<>();
@@ -62,9 +63,11 @@ public class Robot <T extends RobotConfiguration>{
         for (String[] motorData : config.getMotors()) {
             try {
                 String motorName = motorData[0];
+                Log.i(TAG,"initialize: trying to add motor: " + motorName);
                 DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
 
                 motor.resetDeviceConfigurationForOpMode();
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
                 if (motorData[1].equals("reverse")) {
@@ -73,7 +76,6 @@ public class Robot <T extends RobotConfiguration>{
                     motor.setDirection(DcMotorSimple.Direction.FORWARD);
                 }
 
-                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 motors.put(motorName, motor);
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add motor: " + motorData[0]);
@@ -84,11 +86,9 @@ public class Robot <T extends RobotConfiguration>{
         for (String[] servoData : config.getServos()) {
             try {
                 String servoName = servoData[0];
-                if(servoData.length == 1 || !servoData[1].toLowerCase().equals("cr")) {
-                    Servo servo = (Servo) opMode.hardwareMap.get(servoName);
-                    servo.resetDeviceConfigurationForOpMode();
-                    servos.put(servoName, servo);
-                }
+                Servo servo = (Servo) opMode.hardwareMap.get(servoName);
+                servo.resetDeviceConfigurationForOpMode();
+                servos.put(servoName, servo);
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add servo: " + servoData[0]);
                 e.printStackTrace();
@@ -107,9 +107,11 @@ public class Robot <T extends RobotConfiguration>{
             }
         }
 
+        telemetry = opMode.telemetry;
+
     }
 
-    public void runParallel(String endTag, Task... tasks) {
+    public void runParallel(@NonNull String endFlagName, @NonNull Task... tasks) {
         CountDownLatch l = new CountDownLatch(tasks.length);
         for (Task t : tasks) {
             new Thread(() -> {
@@ -120,7 +122,7 @@ public class Robot <T extends RobotConfiguration>{
         new Thread(() -> {
             try {
                 l.await();
-                flags.add(endTag);
+                flags.add(endFlagName);
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
                 Log.e(TAG, "runParallel: Failed to await latch");
@@ -129,62 +131,66 @@ public class Robot <T extends RobotConfiguration>{
 
     }
 
-    public void waitForFlag(String flag) {
+    public void waitForFlag(@NonNull String flagName) {
         boolean flagFound = false;
         while (!flagFound) {
             for (String s : flags)
-                flagFound |= s.equals(flag);
+                flagFound |= s.equals(flagName);
         }
-        flags.remove(flag);
-        System.out.println("Flag \"" + flag + "\" hit.");
+        flags.remove(flagName);
+        System.out.println("Flag \"" + flagName + "\" hit.");
     }
 
 
     //----ROBOT UTILITY FUNCTIONS----//
 
-    public void setPower(String m, double power) {
-        if (motors.get(m) != null) motors.get(m).setPower(power);
+    public void setPower(@NonNull String motorName, double power) {
+        if (motors.get(motorName) != null) motors.get(motorName).setPower(power);
     }
 
     @Nullable
-    public int getEncoderCounts(String m) {
-        return (motors.get(m) != null) ? motors.get(m).getCurrentPosition() : null;
+    public Integer getEncoderCounts(@NonNull String motorName) {
+        return (motors.get(motorName) != null) ? motors.get(motorName).getCurrentPosition() : null;
     }
 
     @Nullable
-    public double getPower(String m) {
-        return (motors.get(m) != null) ? motors.get(m).getPower() : null;
+    public Double getPower(@NonNull String motorName) {
+        return (motors.get(motorName) != null) ? motors.get(motorName).getPower() : null;
     }
 
-    public void resetEncoder(String m) {
-        if (motors.get(m) != null) {
-            setRunMode(m, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setRunMode(m, DcMotor.RunMode.RUN_USING_ENCODER);
+    public void resetEncoder(@NonNull String motorName) {
+        if (motors.get(motorName) != null) {
+            setRunMode(motorName, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setRunMode(motorName, DcMotor.RunMode.RUN_USING_ENCODER);
+        } else {
+            Log.e(TAG,"resetEncoder: motor is null: " + motorName);
         }
     }
 
-    public void setRunMode(String m, DcMotor.RunMode rm) {
-        if (motors.get(m) != null) motors.get(m).setMode(rm);
+    public void setRunMode(@NonNull String motorName, DcMotor.RunMode runMode) {
+        if (motors.get(motorName) != null) motors.get(motorName).setMode(runMode);
     }
 
-    public void setTarget(String m, int target) {
-        if (motors.get(m) != null) {
-            setRunMode(m, DcMotor.RunMode.RUN_TO_POSITION);
-            motors.get(m).setTargetPosition(target);
+    public void setTarget(@NonNull String motorName, int target) {
+        if (motors.get(motorName) != null) {
+            setRunMode(motorName, DcMotor.RunMode.RUN_TO_POSITION);
+            motors.get(motorName).setTargetPosition(target);
         }
     }
 
-    public void runToTarget(String m, int target, double power) {
-        if (motors.get(m) != null) {
-            setTarget(m, target);
-            setPower(m, power);
+    public void runToTarget(@NonNull String motorName, int target, double power) {
+        if (motors.get(motorName) != null) {
+            setTarget(motorName, target);
+            setPower(motorName, power);
+        } else {
+            Log.e(TAG,"runToTarget: failed to run motor: " + motorName + " to target: " + target + " at power: " + power);
         }
     }
 
-    public void runToTarget(String m, int target, double power, boolean reset) {
-        if (motors.get(m) != null) {
-            if (reset) resetEncoder(m);
-            runToTarget(m, target, power);
+    public void runToTarget(@NonNull String motorName, int target, double power, boolean reset) {
+        if (motors.get(motorName) != null) {
+            if (reset) resetEncoder(motorName);
+            runToTarget(motorName, target, power);
         }
     }
 
@@ -222,13 +228,35 @@ public class Robot <T extends RobotConfiguration>{
         return opMode instanceof LinearOpMode && ((LinearOpMode) opMode).opModeIsActive();
     }
 
-    public void setServoPosition(String servo, double position){
-        if(servos.get(servo) != null) servos.get(servo).setPosition(position);
+    public void setServoPosition(@NonNull String servoName, double position) {
+        HardwareDevice servo = servos.get(servoName);
+        if (servo != null) {
+            if (servo instanceof Servo) {
+                ((Servo) servo).setPosition(position);
+            } else if (servo instanceof CRServo) {
+                Log.e(TAG, "setServoPosition: tried setting position of CR servo: " + servoName);
+            } else {
+                Log.println(Log.ASSERT, TAG, "setServoPosition: non-servo object in servo map: " + servoName);
+            }
+        } else Log.e(TAG, "setServoPosition: servo is null: " + servoName);
+    }
+
+    public void setServoPower(@NonNull String servoName, double power) {
+        HardwareDevice servo = servos.get(servoName);
+        if (servo != null) {
+            if (servo instanceof CRServo) {
+                ((CRServo) servo).setPower(power);
+            } else if (servo instanceof Servo) {
+                Log.e(TAG, "setServoPower: tried setting power of non CR servo: " + servoName);
+            } else {
+                Log.println(Log.ASSERT, TAG, "setServoPower: non-servo object in servo map: " + servoName);
+            }
+        } else Log.e(TAG, "setServoPower: CR servo is null: " + servoName);
     }
 
     @Nullable
-    public boolean hasMotorEncoderReached(String m, int val){
-        return (motors.get(m) != null) ? Math.abs(getEncoderCounts(m)) >= Math.abs(val) : null;
+    public boolean hasMotorEncoderReached(@NonNull String motorName, int encoderCount) {
+        return (motors.get(motorName) != null) ? Math.abs(getEncoderCounts(motorName)) >= Math.abs(encoderCount) : null;
     }
 
     //----ROBOT FUNCTIONS BEGIN----//
@@ -239,10 +267,12 @@ public class Robot <T extends RobotConfiguration>{
         while (opModeIsActive() && !t.hasTimeElapsed(msec)) ;
     }
 
+    //DRIVE WITH DEFAULT POWER OF 72%
     public void drive(double distance) {
-        drive(distance, 0.4);
+        drive(distance, 0.72);
     }
 
+    //DRIVE WITH SPECIFIED POWER
     public void drive(double distance, double power) {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
         double wheelRotations = distance / config.wheelCircumference;
@@ -279,7 +309,7 @@ public class Robot <T extends RobotConfiguration>{
     }
 
 
-    //TURN WITH DEFAULT POWER
+    //TURN WITH DEFAULT POWER OF 40%
     public void turn(double degrees) {
         turn(degrees, 0.4);
     }
@@ -329,7 +359,9 @@ public class Robot <T extends RobotConfiguration>{
         Log.v(TAG, "turn: Successfully turned to target of " + degrees + " degrees");
     }
 
-
+    /* DEGREES CONTROLS THE DISTANCE OF THE TURN
+     * THE SIGN OF DEGREES CONTROLS WHICH MOTOR
+     * THE SIGN OF POWER CONTROLS THE DIRECTION OF THE MOTOR */
     public void owTurn(double degrees, double power) {
         double turnCircumference = 2 * config.turnDiameter * Math.PI;
         double wheelRotations = (turnCircumference / config.wheelCircumference) * (Math.abs(degrees) / 360);
@@ -372,13 +404,44 @@ public class Robot <T extends RobotConfiguration>{
         }
     }
 
-
+    //METHOD TO BE CALLED UPON COMPLETION OF AN AUTONOMOUS PROGRAM IF ENCODERS ARE DESIRED TO BE RESET
     public void finish() {
         Log.i(TAG, "finish: entering finish phase");
-//        for (DcMotor motor : motors.values()) {
-//            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        }
         for (String m : motors.keySet()) resetEncoder(m);
+    }
+
+    //SEASON SPECIFIC FUNCTIONS
+    //SEASON SPECIFIC FUNTIONS
+
+    public void lift(double distance, double power) {
+        DcMotor mtrLift = motors.get("mtrLift");
+        double wheelRotations = distance / config.wheelCircumference;
+        int targetEncoderCounts = (int) (wheelRotations * config.countsPerRotation);
+        Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
+
+        runDriveToTarget(targetEncoderCounts, power, targetEncoderCounts, power, true);
+
+        while (opModeIsActive()) {
+
+            Log.d(TAG, "turn: current lift count: " + mtrLift.getCurrentPosition());
+
+            if (Math.abs(getEncoderCounts("mtrLift")) >= Math.abs(targetEncoderCounts) - 20) {
+                setPower("mtrLift", 0);
+            } else {
+                setPower("mtrLift", power);
+            }
+
+            if (Math.abs(getEncoderCounts("mtrRightDrive")) >= Math.abs(targetEncoderCounts) - 20) {
+                setPower("mtrRightDrive", 0);
+            } else {
+                setPower("mtrRightDrive", power);
+            }
+
+            if (getPower("mtrLeftDrive") == 0 && getPower("mtrRightDrive") == 0) break;
+        }
+
+        Log.v(TAG, "drive: Successfully drove to target of " + distance + " inches");
+
     }
 
 
