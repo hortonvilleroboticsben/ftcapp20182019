@@ -275,11 +275,11 @@ public class Robot<T extends RobotConfiguration> {
     //DRIVE WITH SPECIFIED POWER
     public void drive(double distance, double power) {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
-        double wheelRotations = distance / config.wheelCircumference;
-        int targetEncoderCounts = (int) (wheelRotations * config.countsPerRotation);
+        double wheelRotations = distance / config.getWheelCircumference();
+        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation());
         Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
 
-        runDriveToTarget(targetEncoderCounts, power, targetEncoderCounts, power, true);
+        runDriveToTarget(-targetEncoderCounts, power, -targetEncoderCounts, power, true);
 
         while (opModeIsActive()) {
 
@@ -319,20 +319,20 @@ public class Robot<T extends RobotConfiguration> {
     //TURN WITH SPECIFIED POWER
     public void turn(double degrees, double power) {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
-        double turnCircumference = config.turnDiameter * Math.PI;
-        double wheelRotations = (turnCircumference / config.wheelCircumference) * (Math.abs(degrees) / 360);
-        int targetEncoderCounts = (int) (wheelRotations * config.countsPerRotation);
+        double turnCircumference = config.getTurnDiameter() * Math.PI;
+        double wheelRotations = (turnCircumference / config.getWheelCircumference()) * (Math.abs(degrees) / 360);
+        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation())/2;
         Log.i(TAG, "turn: Target counts: " + targetEncoderCounts);
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         if (degrees > 0) {
 
-            runDriveToTarget(-targetEncoderCounts, power, targetEncoderCounts, power, true);
+            runDriveToTarget(targetEncoderCounts, power, -targetEncoderCounts, power, true);
 
         } else {
 
-            runDriveToTarget(targetEncoderCounts, power, -targetEncoderCounts, power, true);
+            runDriveToTarget(-targetEncoderCounts, power, targetEncoderCounts, power, true);
 
         }
 
@@ -365,9 +365,9 @@ public class Robot<T extends RobotConfiguration> {
      * THE SIGN OF DEGREES CONTROLS WHICH MOTOR
      * THE SIGN OF POWER CONTROLS THE DIRECTION OF THE MOTOR */
     public void owTurn(double degrees, double power) {
-        double turnCircumference = 2 * config.turnDiameter * Math.PI;
-        double wheelRotations = (turnCircumference / config.wheelCircumference) * (Math.abs(degrees) / 360);
-        int targetEncoderCounts = (int) (wheelRotations * config.countsPerRotation * Math.signum(power));
+        double turnCircumference = 2 * config.getTurnDiameter() * Math.PI;
+        double wheelRotations = (turnCircumference / config.getWheelCircumference()) * (Math.abs(degrees) / 360);
+        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation() * Math.signum(power));
 
         Log.i(TAG, "owturn: Target counts: " + targetEncoderCounts);
 
@@ -417,8 +417,8 @@ public class Robot<T extends RobotConfiguration> {
 
     public void lift(double distance, double power) {
         DcMotor mtrLift = motors.get("mtrLift");
-        double wheelRotations = distance / config.wheelCircumference;
-        int targetEncoderCounts = (int) (wheelRotations * config.countsPerRotation);
+        double wheelRotations = distance / config.getWheelCircumference();
+        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation());
         Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
 
         runDriveToTarget(targetEncoderCounts, power, targetEncoderCounts, power, true);

@@ -2,9 +2,13 @@ package com.hortonvillerobotics;
 
 public class FinalRobotConfiguration extends RobotConfiguration {
 
-    public double wheelCircumference = 3*Math.PI;
-    public double turnDiameter = 17.9375;
-    public double countsPerRotation = 560;
+    private double wheelCircumference = 3*Math.PI;
+    private double turnDiameter = 17.9375;
+    private double countsPerRotation = 560;
+
+    public double getWheelCircumference(){return wheelCircumference;}
+    public double getTurnDiameter(){return turnDiameter;}
+    public double getCountsPerRotation(){return countsPerRotation;}
 
     private static String[][] motors = {
             {"mtrLeftDrive", "forward"},
