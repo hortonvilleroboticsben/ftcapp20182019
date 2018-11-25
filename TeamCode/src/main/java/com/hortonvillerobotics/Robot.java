@@ -256,6 +256,9 @@ public class Robot <T extends RobotConfiguration>{
             Log.d(TAG, "turn: current right count: " + mtrRightDrive.getCurrentPosition());
             Log.d(TAG, "turn: current left count: " + mtrLeftDrive.getCurrentPosition());
 
+            opMode.telemetry.addData("target", targetEncoderCounts);
+            opMode.telemetry.update();
+
             if (Math.abs(getEncoderCounts("mtrLeftDrive")) >= Math.abs(targetEncoderCounts) - 20) {
                 setPower("mtrLeftDrive", 0);
             } else {
@@ -272,8 +275,7 @@ public class Robot <T extends RobotConfiguration>{
         }
 
 
-        mtrLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        resetDriveEncoders();
         Log.v(TAG, "drive: Successfully drove to target of " + distance + " inches");
 
     }
