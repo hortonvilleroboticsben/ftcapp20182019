@@ -2,8 +2,8 @@ package com.hortonvillerobotics;
 
 public class FinalRobotConfiguration extends RobotConfiguration {
 
-    private double wheelCircumference = 3*Math.PI;
-    private double turnDiameter = 17.9375;
+    private double wheelCircumference = 4.4*Math.PI;
+    private double turnDiameter = 16.8;
     private double countsPerRotation = 560;
 
     public double getWheelCircumference(){return wheelCircumference;}

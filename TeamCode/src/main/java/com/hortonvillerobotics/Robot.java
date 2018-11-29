@@ -86,9 +86,15 @@ public class Robot<T extends RobotConfiguration> {
         for (String[] servoData : config.getServos()) {
             try {
                 String servoName = servoData[0];
-                Servo servo = (Servo) opMode.hardwareMap.get(servoName);
-                servo.resetDeviceConfigurationForOpMode();
-                servos.put(servoName, servo);
+                if(servoData.length > 1 && servoData[1].equalsIgnoreCase("continuous")) {
+                    CRServo servo = (CRServo) opMode.hardwareMap.get(servoName);
+                    servo.resetDeviceConfigurationForOpMode();
+                    servos.put(servoName, servo);
+                } else {
+                    Servo servo = (Servo) opMode.hardwareMap.get(servoName);
+                    servo.resetDeviceConfigurationForOpMode();
+                    servos.put(servoName, servo);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add servo: " + servoData[0]);
                 e.printStackTrace();
@@ -98,9 +104,11 @@ public class Robot<T extends RobotConfiguration> {
         for (String[] sensorData : config.getSensors()) {
             try {
                 String sensorName = sensorData[0];
-                HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
-                sensor.resetDeviceConfigurationForOpMode();
-                sensors.put(sensorName, sensor);
+                if(sensorData.length > 1) {
+                    HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
+                    sensor.resetDeviceConfigurationForOpMode();
+                    sensors.put(sensorName, sensor);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add sensor: " + sensorData[0]);
                 e.printStackTrace();
@@ -220,8 +228,9 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     public void runDriveToTarget(int lTarget, double lPow, int rTarget, double rPow, boolean reset) {
-        runToTarget("mtrLeftDrive", lTarget, lPow, reset);
-        runToTarget("mtrRightDrive", rTarget, rPow, reset);
+        setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setDriveEncoderTarget(lTarget,rTarget);
+        setDrivePower(lPow, rPow);
     }
 
     public boolean opModeIsActive() {
@@ -321,7 +330,7 @@ public class Robot<T extends RobotConfiguration> {
         DcMotor mtrLeftDrive = motors.get("mtrLeftDrive"), mtrRightDrive = motors.get("mtrRightDrive");
         double turnCircumference = config.getTurnDiameter() * Math.PI;
         double wheelRotations = (turnCircumference / config.getWheelCircumference()) * (Math.abs(degrees) / 360);
-        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation())/2;
+        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation());
         Log.i(TAG, "turn: Target counts: " + targetEncoderCounts);
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
