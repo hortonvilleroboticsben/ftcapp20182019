@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
+import com.hortonvillerobotics.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name="TeleOp", group="final")
 public class TeleOp_Run extends LinearOpMode {
     Robot r = Robot.getInstance(this, new FinalRobotConfiguration());
+
+    double srvPos = 0;
+    Timer srvTimer = new Timer();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -24,6 +28,17 @@ public class TeleOp_Run extends LinearOpMode {
                 telemetry.addData((String) s, r.getPower((String)s));
             }
 
+            if (gamepad1.left_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
+                srvPos = srvPos < 1 ? srvPos + 0.008 : 1;
+                srvTimer.reset();
+            } else if (gamepad1.right_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
+                srvPos = srvPos > 0 ? srvPos - 0.008 : 0;
+                srvTimer.reset();
+            }
+
+            r.setServoPosition("srvLock", srvPos);
+
+            telemetry.addData("srvPos", srvPos);
             telemetry.update();
         }
     }
