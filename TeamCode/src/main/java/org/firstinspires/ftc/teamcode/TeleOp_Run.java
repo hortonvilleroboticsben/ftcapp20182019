@@ -22,7 +22,7 @@ public class TeleOp_Run extends LinearOpMode {
         while(!opModeIsActive()){}
         while(opModeIsActive()){
 //            ((DcMotor) r.motors.get("mtrLeftDrive")).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            r.setDrivePower(Math.abs(gamepad1.left_stick_y) >= 0.05 ? gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) >= 0.05 ? gamepad1.right_stick_y : 0);
+            r.setDrivePower(Math.abs(gamepad1.left_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.2 : 1) * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.2 : 1) * gamepad1.right_stick_y : 0);
             r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
             for(Object s : r.motors.keySet()){
                 telemetry.addData((String) s, r.getPower((String)s));

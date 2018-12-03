@@ -243,6 +243,7 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     public void runDriveToTarget(int lTarget, double lPow, int rTarget, double rPow, boolean reset) {
+        if(reset) resetDriveEncoders();
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
         setDriveEncoderTarget(lTarget,rTarget);
         setDrivePower(lPow, rPow);
