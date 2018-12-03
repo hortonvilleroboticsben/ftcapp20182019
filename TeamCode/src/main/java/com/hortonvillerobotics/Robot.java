@@ -1,5 +1,6 @@
 package com.hortonvillerobotics;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -20,6 +21,16 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
+import boofcv.alg.filter.binary.BinaryImageOps;
+import boofcv.alg.filter.binary.Contour;
+import boofcv.alg.filter.binary.ThresholdImageOps;
+import boofcv.android.ConvertBitmap;
+import boofcv.struct.ConnectRule;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.GrayU8;
+import boofcv.struct.image.Planar;
+import georegression.struct.point.Point2D_I32;
+
 public class Robot<T extends RobotConfiguration> {
     //this comment line is just so I can push
 
@@ -27,6 +38,9 @@ public class Robot<T extends RobotConfiguration> {
 
     private static Robot currInstance;
 
+    public static Bitmap[] cameraSnapshots;
+
+    public static final String[] blockLocation = {"error"};
 
     Telemetry telemetry;
 
@@ -59,6 +73,7 @@ public class Robot<T extends RobotConfiguration> {
         motors = new HashMap<>();
         servos = new HashMap<>();
         sensors = new HashMap<>();
+        cameraSnapshots = new Bitmap[3];
 
         for (String[] motorData : config.getMotors()) {
             try {
@@ -264,7 +279,7 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     @Nullable
-    public boolean hasMotorEncoderReached(@NonNull String motorName, int encoderCount) {
+    public Boolean hasMotorEncoderReached(@NonNull String motorName, int encoderCount) {
         return (motors.get(motorName) != null) ? Math.abs(getEncoderCounts(motorName)) >= Math.abs(encoderCount) : null;
     }
 
@@ -423,6 +438,75 @@ public class Robot<T extends RobotConfiguration> {
 
     //SEASON SPECIFIC FUNCTIONS
     //SEASON SPECIFIC FUNTIONS
+
+    //TODO implement this method
+    public static void getCameraCapture() {
+
+    }
+
+    public static void analyzePhotoData() {
+        (new Thread(() -> {
+
+//            Planar<GrayF32> layers = ConvertBufferedImage.convertFromPlanar(originalBufferedImage, null, true, GrayF32.class);
+            for(Bitmap bitmap : cameraSnapshots) {
+                Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap,null,GrayF32.class,null);
+
+                GrayF32 blueLayer = layers.getBand(2);
+                int width = blueLayer.getWidth(), height = 2 * (blueLayer.getHeight() / 5);
+                GrayF32 subImage = blueLayer.subimage(0, blueLayer.height - height, width, blueLayer.height);
+
+                GrayU8 thresh = new GrayU8(width, height),
+                        dilated = new GrayU8(width, height),
+                        eroded = new GrayU8(width, height);
+
+                float threshold = 160;
+                ThresholdImageOps.threshold(subImage, thresh, threshold, false);
+                BinaryImageOps.erode8(thresh, 2, eroded);
+                BinaryImageOps.dilate8(eroded, 2, dilated);
+
+                List<Contour> contours =
+                        BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
+
+
+                int requiredSize = 30000, numLarger = 0;
+                Point2D_I32 p1 = null;
+                for (Contour c : contours) {
+                    int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+                    if (c.external.size() == 0) continue;
+                    for (Point2D_I32 p : c.external) {
+                        if (p.x > maxX) maxX = p.x;
+                        if (p.x < minX) minX = p.x;
+                        if (p.y > maxY) maxY = p.y;
+                        if (p.y < minY) minY = p.y;
+                    }
+                    int w = maxX - minX;
+                    int h = maxY - minY;
+                    int size = w * h;
+                    if (size > requiredSize) {
+
+                        int avg_x = 0, avg_y = 0;
+                        for (Point2D_I32 p : c.external) {
+                            avg_x += p.x;
+                            avg_y += p.y;
+                        }
+                        avg_x /= c.external.size();
+                        avg_y /= c.external.size();
+
+                        if (numLarger == 0) {
+                            p1 = new Point2D_I32(avg_x, avg_y);
+                            numLarger++;
+                        } else if (numLarger == 1) {
+                            numLarger++;
+                            break;
+                        }
+                    }
+                }
+
+                blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > width / 2) ? "left" : "center" : "error";
+            }
+
+        })).run();
+    }
 
     public void lift(double distance, double power) {
         DcMotor mtrLift = motors.get("mtrLift");

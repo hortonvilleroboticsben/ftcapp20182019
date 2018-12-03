@@ -32,15 +32,17 @@ public class FileUtils {
         }catch(Exception e){e.printStackTrace();}
     }
 
-    public static String readFromFile(String fileName){
+    public static byte[] readFromFile(String fileName){
         try{
             File f = new File(Environment.getExternalStorageDirectory() + fileName);
             checkFileExistence(f);
             InputStream i = new FileInputStream(f);
             byte[] b = new byte[(int)f.length()];
             i.read(b);
-            return new String(b);
-        }catch(Exception e){e.printStackTrace();}
+            return b;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
