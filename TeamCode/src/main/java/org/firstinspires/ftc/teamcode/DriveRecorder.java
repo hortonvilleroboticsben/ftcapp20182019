@@ -64,8 +64,6 @@ public class DriveRecorder extends LinearOpMode {
             lockA = lockA == -1 && lockB == -1 ? Math.abs(gamepad1.left_stick_y) >= 0.05 ? 1 : Math.abs(gamepad1.right_stick_x) >= 0.05 ? 0 : -1 : lockA;
             lockB = lockA == -1 && lockB == -1 ? Math.abs(gamepad2.left_stick_y) >= 0.05 ? 1 : Math.abs(gamepad2.right_stick_y) >= 0.05 ? 0 : -1 : lockB;
 
-            r.setDriveRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
             if(lockA != -1)
                 switch(lockA) {
                     case 1:

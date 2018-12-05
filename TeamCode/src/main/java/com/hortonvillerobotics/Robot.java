@@ -1,6 +1,9 @@
 package com.hortonvillerobotics;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.YuvImage;
+import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.HashMap;
@@ -438,11 +442,33 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     //SEASON SPECIFIC FUNCTIONS
-    //SEASON SPECIFIC FUNTIONS
+    //SEASON SPECIFIC FUNCTIONS
 
     //TODO implement this method
+    static private boolean pic = false;
+    static private int i = 0;
+    static byte[][] out = new byte[3][];
     public static void getCameraCapture() {
-
+        FtcRobotControllerActivity.cp.mCamera.setPreviewCallback(new Camera.PreviewCallback() {
+            @Override
+            public void onPreviewFrame(byte[] bytes, Camera camera) {
+                if (pic) {
+                    Camera.Parameters parameters = camera.getParameters();
+                    Camera.Size size = parameters.getPreviewSize();
+                    YuvImage image = new YuvImage(bytes, parameters.getPreviewFormat(),
+                            size.width, size.height, null);
+                    bytes = image.getYuvData();
+                    out[i] = image.getYuvData();
+                    pic = false;
+                }
+            }
+        });
+        while(i < 3){
+            pic = true;
+            while(pic);
+            i++;
+        }
+        for(int j = 0; j < out.length; j++) cameraSnapshots[j] = BitmapFactory.decodeByteArray(out[j], 0, out[j].length);
     }
 
     public static void analyzePhotoData() {

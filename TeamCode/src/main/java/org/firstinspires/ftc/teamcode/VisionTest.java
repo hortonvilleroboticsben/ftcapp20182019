@@ -52,7 +52,6 @@ public class VisionTest extends LinearOpMode {
                     YuvImage image = new YuvImage(bytes, parameters.getPreviewFormat(),
                             size.width, size.height, null);
                     bytes = image.getYuvData();
-//                    b = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
                     b = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
