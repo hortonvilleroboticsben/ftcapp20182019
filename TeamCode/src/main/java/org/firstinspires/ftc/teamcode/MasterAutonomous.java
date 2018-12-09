@@ -21,7 +21,7 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 public class MasterAutonomous extends LinearOpMode {
 
     boolean crater = false;
-    String blockPos = "";
+//    String blockPos = "";
     StateMachine s = new StateMachine();
     long startPause = 0;
     boolean pauseOS = false, n = false;
@@ -37,50 +37,62 @@ public class MasterAutonomous extends LinearOpMode {
 
         while(!opModeIsActive()){
             s.runStates(()->{
-                        telemetry.addData("Crater Side", "A for Yes, B for No");
-                        telemetry.update();
-                        if((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
-                            crater = gamepad1.a;
-                            n = true;
-                        }
-                        if(n && !gamepad1.a && !gamepad1.b) {
-                            n = false;
-                            s.incrementState();
-                        }
+                telemetry.addData("Crater Side", "A for Yes, B for No");
+                telemetry.update();
+                if((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
+                    crater = gamepad1.a;
+                    n = true;
+                }
+                if(n && !gamepad1.a && !gamepad1.b) {
+                    n = false;
+                    s.incrementState();
+                }
 
-                    }, ()->{
-                        telemetry.addData("DEBUG:Mineral Position", "X for Left, Y for Center, B for Right");
-                        telemetry.update();
-                        if((gamepad1.x ^ gamepad1.y ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
-                            blockPos = gamepad1.x ? "left" : gamepad1.y ? "center" : "right";
-                            n = true;
-                        }
-                        if(n && !gamepad1.x && !gamepad1.y && !gamepad1.b) {
-                            n = false;
-                            s.incrementState();
-                        }
-                    }, ()->{
-                        telemetry.addData("Starting Pause", "DPad to Change, A to Confirm");
-                        telemetry.addData("Current Pause", startPause);
-                        telemetry.update();
+            }/*, ()->{
+                telemetry.addData("DEBUG:Mineral Position", "X for Left, Y for Center, B for Right");
+                telemetry.update();
+                if((gamepad1.x ^ gamepad1.y ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
+                    blockPos = gamepad1.x ? "left" : gamepad1.y ? "center" : "right";
+                    n = true;
+                }
+                if(n && !gamepad1.x && !gamepad1.y && !gamepad1.b) {
+                    n = false;
+                    s.incrementState();
+                }
+            }*/, ()->{
+                telemetry.addData("Starting Pause", "DPad to Change, A to Confirm");
+                telemetry.addData("Current Pause", startPause);
+                telemetry.update();
 
-                        if(!pauseOS) {
-                            if (gamepad1.dpad_up) {
-                                startPause += 1000;
-                                pauseOS = true;
-                            } else if (gamepad1.dpad_down) {
-                                startPause -= 1000;
-                                pauseOS = true;
-                            }
-                        }else if(!gamepad1.dpad_up && !gamepad1.dpad_down) pauseOS = false;
-
-                        });
+                if(!pauseOS) {
+                    if (gamepad1.dpad_up) {
+                        startPause += 1000;
+                        pauseOS = true;
+                    } else if (gamepad1.dpad_down) {
+                        startPause -= 1000;
+                        pauseOS = true;
                     }
+                }else if(!gamepad1.dpad_up && !gamepad1.dpad_down) pauseOS = false;
 
-                    rbt.pause(startPause);
+                if(gamepad1.a && !gamepad1.start && !gamepad2.start) n = true;
+                if(!gamepad1.a && n)s.incrementState();
 
-            rbt.runToTarget("mtrLift",5800,.72,true);
-            while(!rbt.hasMotorEncoderReached("mtrLift",5790));
+            }, ()->{
+                telemetry.addData("Ready To Go!","");
+                telemetry.update();
+            });
+        }
+
+        rbt.runParallel("ScanPause",()->{
+            rbt.pause(startPause);
+        },()->{
+            rbt.getCameraCapture();
+        });
+        rbt.waitForFlag("ScanPause");
+
+        rbt.runParallel("ProcessLower",()-> {
+            rbt.runToTarget("mtrLift", 5800, .72, true);
+            while (!rbt.hasMotorEncoderReached("mtrLift", 5790)) ;
             rbt.setPower("mtrLift", 0);
 
             rbt.owTurn(13.0, 0.23);
@@ -91,80 +103,83 @@ public class MasterAutonomous extends LinearOpMode {
 
             rbt.owTurn(-93.5, 0.23);
             rbt.pause(50);
+        },()->{
+            rbt.analyzePhotoData();
+        });
 
-            switch (blockPos){
-                case "right":
-                    rbt.turn(-183, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(22, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(-19, 0.23);
-                    rbt.pause(50);
-
-                    rbt.turn(90, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(12,0.23);
-                    rbt.pause(50);
-                    break;
-                case "center":
-                    rbt.turn(-148, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(23, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(-14, 0.23);
-                    rbt.pause(50);
-
-                    rbt.owTurn(-62, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(18, 0.23);
-                    rbt.pause(50);
-                    break;
-                case "left":
-                    rbt.turn(-120, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(30, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(-18, 0.23);
-                    rbt.pause(50);
-
-                    rbt.owTurn(-40, 0.23);
-                    rbt.pause(50);
-
-                    rbt.drive(8.75, 0.23);
-                    rbt.pause(50);
-                    break;
-            }
-
-            if(!crater){
-                rbt.drive(24, 0.23);
+        switch (rbt.blockLocation[0]){
+            case "right":
+                rbt.turn(-183, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(137, -0.23);
+                rbt.drive(22, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(-20, 0.23);
+                rbt.drive(-19, 0.23);
                 rbt.pause(50);
 
-                rbt.pause(500);
-            }else{
+                rbt.turn(90, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(12,0.23);
+                rbt.pause(50);
+                break;
+            case "center":
+                rbt.turn(-148, 0.23);
+                rbt.pause(50);
+
                 rbt.drive(23, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(45,-0.23);
+                rbt.drive(-14, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(-90, 0.23);
+                rbt.owTurn(-64, 0.23);
                 rbt.pause(50);
-            }
 
+                rbt.drive(18, 0.23);
+                rbt.pause(50);
+                break;
+            case "left":
+                rbt.turn(-120, 0.23);
+                rbt.pause(50);
 
+                rbt.drive(30, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(-18, 0.23);
+                rbt.pause(50);
+
+                rbt.owTurn(-40, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(8.75, 0.23);
+                rbt.pause(50);
+                break;
         }
+
+        if(!crater){
+            rbt.drive(24, 0.23);
+            rbt.pause(50);
+
+            rbt.owTurn(137, -0.23);
+            rbt.pause(50);
+
+            rbt.drive(-20, 0.23);
+            rbt.pause(50);
+
+            rbt.pause(500);
+        }else{
+            rbt.drive(23, 0.23);
+            rbt.pause(50);
+
+            rbt.owTurn(45,-0.23);
+            rbt.pause(50);
+
+            rbt.owTurn(-90, 0.23);
+            rbt.pause(50);
+        }
+
+
     }
+}

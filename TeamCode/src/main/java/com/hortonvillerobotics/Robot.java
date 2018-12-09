@@ -165,7 +165,7 @@ public class Robot<T extends RobotConfiguration> {
 
     public void waitForFlag(@NonNull String flagName) {
         boolean flagFound = false;
-        while (!flagFound) {
+        while (!flagFound && opModeIsActive()) {
             for (String s : flags)
                 flagFound |= s.equals(flagName);
         }
@@ -450,13 +450,13 @@ public class Robot<T extends RobotConfiguration> {
     //SEASON SPECIFIC FUNCTIONS
 
     //TODO implement this method
-    static private boolean pic = false;
-    static private int i = 0;
     static byte[][] out = new byte[3][];
 
     public void getCameraCapture() {
 
-        CountDownLatch cdl = new CountDownLatch(3);
+        CountDownLatch cdl = new CountDownLatch(1);
+        final int[] i = new int [1];
+        i[0] = 0;
 
         FtcRobotControllerActivity.cp.mCamera.setPreviewCallback((bytes, camera) -> {
             Log.i(TAG,"getCameraCapture: inside camera callback");
@@ -467,8 +467,8 @@ public class Robot<T extends RobotConfiguration> {
                     size.width, size.height, null);
             ByteArrayOutputStream outS = new ByteArrayOutputStream();
             image.compressToJpeg(new Rect(0,0,size.width, size.height),100, outS);
-            FileUtils.writeToFile("/"+i+".jpg",outS.toByteArray());
-            out[i++] = outS.toByteArray();
+            FileUtils.writeToFile("/"+i[0]+".jpg",outS.toByteArray());
+            out[i[0]++] = outS.toByteArray();
             cdl.countDown();
         });
         try {
@@ -478,7 +478,7 @@ public class Robot<T extends RobotConfiguration> {
             e.printStackTrace();
         }
 
-        for (int j = 0; j < out.length; j++) {
+        for (int j = 0; j < out.length && opModeIsActive(); j++) {
             try {
                 cameraSnapshots[j] = BitmapFactory.decodeByteArray(out[j], 0, out[j].length);
             } catch (Exception e) {
@@ -494,6 +494,7 @@ public class Robot<T extends RobotConfiguration> {
 
 //            Planar<GrayF32> layers = ConvertBufferedImage.convertFromPlanar(originalBufferedImage, null, true, GrayF32.class);
         for (Bitmap bitmap : cameraSnapshots) {
+            if(!opModeIsActive()) break;
             if (bitmap == null) continue;
             Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap, null, GrayF32.class, null);
 
@@ -536,7 +537,7 @@ public class Robot<T extends RobotConfiguration> {
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
 
 
-            int requiredSize = 7500, numLarger = 0;
+            int requiredSize = 10000, numLarger = 0;
             Point2D_I32 p1 = null;
             for (Contour c : contours) {
                 int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
@@ -551,9 +552,9 @@ public class Robot<T extends RobotConfiguration> {
                 int h = maxY - minY;
                 int size = w * h;
 
-                Log.e("SIZE", size+"");
-
                 if (size > requiredSize) {
+
+//                    FileUtils.appendToFile("/sizes.txt", size+"\r\n");
 
                     int avg_x = 0, avg_y = 0;
                     for (Point2D_I32 p : c.external) {
