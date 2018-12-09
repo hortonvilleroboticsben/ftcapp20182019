@@ -2,6 +2,7 @@ package com.hortonvillerobotics;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
@@ -19,6 +20,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +47,9 @@ public class Robot<T extends RobotConfiguration> {
 
     private static Robot currInstance;
 
-    public static Bitmap[] cameraSnapshots;
+    public Bitmap[] cameraSnapshots;
 
-    public static final String[] blockLocation = {"error"};
+    public final String[] blockLocation = {"error"};
 
     Telemetry telemetry;
 
@@ -82,7 +87,7 @@ public class Robot<T extends RobotConfiguration> {
         for (String[] motorData : config.getMotors()) {
             try {
                 String motorName = motorData[0];
-                Log.i(TAG,"initialize: trying to add motor: " + motorName);
+                Log.i(TAG, "initialize: trying to add motor: " + motorName);
                 DcMotor motor = (DcMotor) opMode.hardwareMap.get(motorName);
 
                 motor.resetDeviceConfigurationForOpMode();
@@ -105,7 +110,7 @@ public class Robot<T extends RobotConfiguration> {
         for (String[] servoData : config.getServos()) {
             try {
                 String servoName = servoData[0];
-                if(servoData.length > 1 && servoData[1].equalsIgnoreCase("continuous")) {
+                if (servoData.length > 1 && servoData[1].equalsIgnoreCase("continuous")) {
                     CRServo servo = (CRServo) opMode.hardwareMap.get(servoName);
                     servo.resetDeviceConfigurationForOpMode();
                     servos.put(servoName, servo);
@@ -123,7 +128,7 @@ public class Robot<T extends RobotConfiguration> {
         for (String[] sensorData : config.getSensors()) {
             try {
                 String sensorName = sensorData[0];
-                if(sensorData.length > 1) {
+                if (sensorData.length > 1) {
                     HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                     sensor.resetDeviceConfigurationForOpMode();
                     sensors.put(sensorName, sensor);
@@ -190,7 +195,7 @@ public class Robot<T extends RobotConfiguration> {
             setRunMode(motorName, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setRunMode(motorName, DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
-            Log.e(TAG,"resetEncoder: motor is null: " + motorName);
+            Log.e(TAG, "resetEncoder: motor is null: " + motorName);
         }
     }
 
@@ -210,7 +215,7 @@ public class Robot<T extends RobotConfiguration> {
             setTarget(motorName, target);
             setPower(motorName, power);
         } else {
-            Log.e(TAG,"runToTarget: failed to run motor: " + motorName + " to target: " + target + " at power: " + power);
+            Log.e(TAG, "runToTarget: failed to run motor: " + motorName + " to target: " + target + " at power: " + power);
         }
     }
 
@@ -247,9 +252,9 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     public void runDriveToTarget(int lTarget, double lPow, int rTarget, double rPow, boolean reset) {
-        if(reset) resetDriveEncoders();
+        if (reset) resetDriveEncoders();
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
-        setDriveEncoderTarget(lTarget,rTarget);
+        setDriveEncoderTarget(lTarget, rTarget);
         setDrivePower(lPow, rPow);
     }
 
@@ -448,91 +453,130 @@ public class Robot<T extends RobotConfiguration> {
     static private boolean pic = false;
     static private int i = 0;
     static byte[][] out = new byte[3][];
-    public static void getCameraCapture() {
-        FtcRobotControllerActivity.cp.mCamera.setPreviewCallback(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] bytes, Camera camera) {
-                if (pic) {
-                    Camera.Parameters parameters = camera.getParameters();
-                    Camera.Size size = parameters.getPreviewSize();
-                    YuvImage image = new YuvImage(bytes, parameters.getPreviewFormat(),
-                            size.width, size.height, null);
-                    bytes = image.getYuvData();
-                    out[i] = image.getYuvData();
-                    pic = false;
-                }
-            }
+
+    public void getCameraCapture() {
+
+        CountDownLatch cdl = new CountDownLatch(3);
+
+        FtcRobotControllerActivity.cp.mCamera.setPreviewCallback((bytes, camera) -> {
+            Log.i(TAG,"getCameraCapture: inside camera callback");
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.getPreviewFormat();
+            Camera.Size size = parameters.getPreviewSize();
+            YuvImage image = new YuvImage(bytes, parameters.getPreviewFormat(),
+                    size.width, size.height, null);
+            ByteArrayOutputStream outS = new ByteArrayOutputStream();
+            image.compressToJpeg(new Rect(0,0,size.width, size.height),100, outS);
+            FileUtils.writeToFile("/"+i+".jpg",outS.toByteArray());
+            out[i++] = outS.toByteArray();
+            cdl.countDown();
         });
-        while(i < 3){
-            pic = true;
-            while(pic);
-            i++;
+        try {
+            cdl.await();
+            FtcRobotControllerActivity.cp.mCamera.setPreviewCallback(null);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        for(int j = 0; j < out.length; j++) cameraSnapshots[j] = BitmapFactory.decodeByteArray(out[j], 0, out[j].length);
+
+        for (int j = 0; j < out.length; j++) {
+            try {
+                cameraSnapshots[j] = BitmapFactory.decodeByteArray(out[j], 0, out[j].length);
+            } catch (Exception e) {
+                Log.e(TAG,"getCameraCapture: something is null");
+                e.printStackTrace();
+            }
+        }
+
     }
 
-    public static void analyzePhotoData() {
-        (new Thread(() -> {
+    public void analyzePhotoData() {
+//        (new Thread(() -> {
 
 //            Planar<GrayF32> layers = ConvertBufferedImage.convertFromPlanar(originalBufferedImage, null, true, GrayF32.class);
-            for(Bitmap bitmap : cameraSnapshots) {
-                Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap,null,GrayF32.class,null);
+        for (Bitmap bitmap : cameraSnapshots) {
+            if (bitmap == null) continue;
+            Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap, null, GrayF32.class, null);
 
-                GrayF32 blueLayer = layers.getBand(2);
-                int width = blueLayer.getWidth(), height = 2 * (blueLayer.getHeight() / 5);
-                GrayF32 subImage = blueLayer.subimage(0, blueLayer.height - height, width, blueLayer.height);
+            GrayF32 blueLayer = layers.getBand(2);
+//            int width = 2 * (blueLayer.width / 5), height = blueLayer.height;
+            int width = blueLayer.width/3, height = blueLayer.height;
+            GrayF32 subImage = blueLayer.subimage(0, 0, blueLayer.width/3, blueLayer.height);
 
-                GrayU8 thresh = new GrayU8(width, height),
-                        dilated = new GrayU8(width, height),
-                        eroded = new GrayU8(width, height);
+            GrayU8 thresh = new GrayU8(width, height),
+                    dilated = new GrayU8(width, height),
+                    eroded = new GrayU8(width, height);
 
-                float threshold = 160;
-                ThresholdImageOps.threshold(subImage, thresh, threshold, false);
-                BinaryImageOps.erode8(thresh, 2, eroded);
-                BinaryImageOps.dilate8(eroded, 2, dilated);
+            float threshold = 160;
+            ThresholdImageOps.threshold(subImage, thresh, threshold, false);
+            BinaryImageOps.erode8(thresh, 2, eroded);
+            BinaryImageOps.dilate8(eroded, 2, dilated);
 
-                List<Contour> contours =
-                        BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
+            GrayU8 g = dilated.clone();
 
+//            for(int index = 0; index < g.data.length; index++) {
+//                if(g.data[index] > 0) g.data[index] = (byte) 255;
+//            }
 
-                int requiredSize = 30000, numLarger = 0;
-                Point2D_I32 p1 = null;
-                for (Contour c : contours) {
-                    int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
-                    if (c.external.size() == 0) continue;
-                    for (Point2D_I32 p : c.external) {
-                        if (p.x > maxX) maxX = p.x;
-                        if (p.x < minX) minX = p.x;
-                        if (p.y > maxY) maxY = p.y;
-                        if (p.y < minY) minY = p.y;
-                    }
-                    int w = maxX - minX;
-                    int h = maxY - minY;
-                    int size = w * h;
-                    if (size > requiredSize) {
-
-                        int avg_x = 0, avg_y = 0;
-                        for (Point2D_I32 p : c.external) {
-                            avg_x += p.x;
-                            avg_y += p.y;
-                        }
-                        avg_x /= c.external.size();
-                        avg_y /= c.external.size();
-
-                        if (numLarger == 0) {
-                            p1 = new Point2D_I32(avg_x, avg_y);
-                            numLarger++;
-                        } else if (numLarger == 1) {
-                            numLarger++;
-                            break;
-                        }
-                    }
+            for(int x = 0; x < g.width; x++) {
+                for(int y = 0; y < g.height; y++) {
+                    if(g.get(x,y)>0) g.set(x,y,50);
                 }
-
-                blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > width / 2) ? "left" : "center" : "error";
             }
 
-        })).run();
+//            for(byte b : g.data)Log.d("ImageData",""+b);
+
+
+            Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
+            ByteArrayOutputStream outS = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
+            FileUtils.writeToFile("/"+3+".jpg", outS.toByteArray());
+
+
+            List<Contour> contours =
+                    BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
+
+
+            int requiredSize = 7500, numLarger = 0;
+            Point2D_I32 p1 = null;
+            for (Contour c : contours) {
+                int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+                if (c.external.size() == 0) continue;
+                for (Point2D_I32 p : c.external) {
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.x < minX) minX = p.x;
+                    if (p.y > maxY) maxY = p.y;
+                    if (p.y < minY) minY = p.y;
+                }
+                int w = maxX - minX;
+                int h = maxY - minY;
+                int size = w * h;
+
+                Log.e("SIZE", size+"");
+
+                if (size > requiredSize) {
+
+                    int avg_x = 0, avg_y = 0;
+                    for (Point2D_I32 p : c.external) {
+                        avg_x += p.x;
+                        avg_y += p.y;
+                    }
+                    avg_x /= c.external.size();
+                    avg_y /= c.external.size();
+
+                    if (numLarger == 0) {
+                        p1 = new Point2D_I32(avg_x, avg_y);
+                        numLarger++;
+                    } else if (numLarger == 1) {
+                        numLarger++;
+                        break;
+                    }
+                }
+            }
+
+            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.y > height / 2) ? "left" : "center" : "error";
+        }
+
+//        })).run();
     }
 
     public void lift(double distance, double power) {
