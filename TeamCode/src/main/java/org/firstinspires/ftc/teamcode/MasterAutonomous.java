@@ -1,49 +1,170 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.hardware.Camera;
+import android.os.Looper;
+
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
+import com.hortonvillerobotics.StateMachine;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.robotcontroller.internal.ActivityHolder;
+import org.firstinspires.ftc.robotcontroller.internal.CameraPreview;
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
+import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cameraView;
+import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cp;
 
 @Autonomous(name = "Autonomous",group = "competition")
 public class MasterAutonomous extends LinearOpMode {
 
-
-    String alliance = "blue";
-    int startPosition = 1, routeNumber = 1;
+    boolean crater = false;
+    String blockPos = "";
+    StateMachine s = new StateMachine();
+    long startPause = 0;
+    boolean pauseOS = false, n = false;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         Robot rbt = Robot.getInstance(this,new FinalRobotConfiguration());
         rbt.initialize(this, new FinalRobotConfiguration());
 
-        telemetry.addData("Alliance?","a: blue, b: red");
-        updateTelemetry(telemetry);
-        while(!gamepad1.a && !gamepad1.b);
-        alliance = gamepad1.a ? "blue" : "red";
-        while(gamepad1.a || gamepad1.b);
-        telemetry.addData("Start Position?","a: 1, b: 2");
-        updateTelemetry(telemetry);
-        while(!gamepad1.a && !gamepad1.b);
-        startPosition = gamepad1.a ? 1 : 2;
-        while(gamepad1.a || gamepad1.b);
-        telemetry.addData("Route Number?","a: 1, b: 2");
-        updateTelemetry(telemetry);
-        while(!gamepad1.a && !gamepad1.b);
-        routeNumber = gamepad1.a ? 1 : 2;
-        telemetry.addData("Ready to go","");
-        updateTelemetry(telemetry);
+//        FtcRobotControllerActivity.initCamera();
 
-        waitForStart();
 
-        (new Runnable() {
-            @Override
-            public void run() {
-                rbt.getCameraCapture();
-                rbt.analyzePhotoData();
+        while(!opModeIsActive()){
+            s.runStates(()->{
+                        telemetry.addData("Crater Side", "A for Yes, B for No");
+                        telemetry.update();
+                        if((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
+                            crater = gamepad1.a;
+                            n = true;
+                        }
+                        if(n && !gamepad1.a && !gamepad1.b) {
+                            n = false;
+                            s.incrementState();
+                        }
+
+                    }, ()->{
+                        telemetry.addData("DEBUG:Mineral Position", "X for Left, Y for Center, B for Right");
+                        telemetry.update();
+                        if((gamepad1.x ^ gamepad1.y ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
+                            blockPos = gamepad1.x ? "left" : gamepad1.y ? "center" : "right";
+                            n = true;
+                        }
+                        if(n && !gamepad1.x && !gamepad1.y && !gamepad1.b) {
+                            n = false;
+                            s.incrementState();
+                        }
+                    }, ()->{
+                        telemetry.addData("Starting Pause", "DPad to Change, A to Confirm");
+                        telemetry.addData("Current Pause", startPause);
+                        telemetry.update();
+
+                        if(!pauseOS) {
+                            if (gamepad1.dpad_up) {
+                                startPause += 1000;
+                                pauseOS = true;
+                            } else if (gamepad1.dpad_down) {
+                                startPause -= 1000;
+                                pauseOS = true;
+                            }
+                        }else if(!gamepad1.dpad_up && !gamepad1.dpad_down) pauseOS = false;
+
+                        });
+                    }
+
+                    rbt.pause(startPause);
+
+            rbt.runToTarget("mtrLift",5800,.72,true);
+            while(!rbt.hasMotorEncoderReached("mtrLift",5790));
+            rbt.setPower("mtrLift", 0);
+
+            rbt.owTurn(13.0, 0.23);
+            rbt.pause(50);
+
+            rbt.owTurn(17.0, -0.23);
+            rbt.pause(50);
+
+            rbt.owTurn(-93.5, 0.23);
+            rbt.pause(50);
+
+            switch (blockPos){
+                case "right":
+                    rbt.turn(-183, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(22, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(-19, 0.23);
+                    rbt.pause(50);
+
+                    rbt.turn(90, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(12,0.23);
+                    rbt.pause(50);
+                    break;
+                case "center":
+                    rbt.turn(-148, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(23, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(-14, 0.23);
+                    rbt.pause(50);
+
+                    rbt.owTurn(-62, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(18, 0.23);
+                    rbt.pause(50);
+                    break;
+                case "left":
+                    rbt.turn(-120, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(30, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(-18, 0.23);
+                    rbt.pause(50);
+
+                    rbt.owTurn(-40, 0.23);
+                    rbt.pause(50);
+
+                    rbt.drive(8.75, 0.23);
+                    rbt.pause(50);
+                    break;
             }
-        }).run();
 
+            if(!crater){
+                rbt.drive(24, 0.23);
+                rbt.pause(50);
+
+                rbt.owTurn(137, -0.23);
+                rbt.pause(50);
+
+                rbt.drive(-20, 0.23);
+                rbt.pause(50);
+
+                rbt.pause(500);
+            }else{
+                rbt.drive(23, 0.23);
+                rbt.pause(50);
+
+                rbt.owTurn(45,-0.23);
+                rbt.pause(50);
+
+                rbt.owTurn(-90, 0.23);
+                rbt.pause(50);
+            }
+
+
+        }
     }
-}

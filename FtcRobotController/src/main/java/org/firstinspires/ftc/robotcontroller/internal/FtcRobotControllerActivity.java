@@ -320,6 +320,7 @@ public class FtcRobotControllerActivity extends Activity
     cp.mCamera.setDisplayOrientation(90);
     cameraView.addView(cp);
 
+
     programmingWebHandlers = new ProgrammingWebHandlers();
     programmingModeController = new ProgrammingModeControllerImpl(
             this, (TextView) findViewById(R.id.textRemoteProgrammingMode), programmingWebHandlers);
@@ -382,6 +383,11 @@ public class FtcRobotControllerActivity extends Activity
         return false;
       }
     });
+  }
+
+  public static void initCamera(){
+    cp = new CameraPreview(ActivityHolder.getActivity(), Camera.open(0));
+    cp.mCamera.setDisplayOrientation(90);
   }
 
   @Override
