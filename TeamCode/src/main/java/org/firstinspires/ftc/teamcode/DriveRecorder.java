@@ -90,7 +90,7 @@ public class DriveRecorder extends LinearOpMode {
                         FileUtils.appendToFile(FILENAME, "\t\trbt.turn("+Math.signum(r.getEncoderCounts("mtrLeftDrive"))*backDrive_Turn((Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n\t\trbt.pause(50);\n\n");
                         break;
                     case 1:
-                        FileUtils.appendToFile(FILENAME, "\t\trbt.drive("+-backDrive_Drive((Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n\t\trbt.pause(50);\n\n");
+                        FileUtils.appendToFile(FILENAME, "\t\trbt.drive("+backDrive_Drive((Math.abs(r.getEncoderCounts("mtrLeftDrive"))+Math.abs(r.getEncoderCounts("mtrRightDrive")))/2)+", "+STD_POWER+");\n\t\trbt.pause(50);\n\n");
                         break;
                 }
                 r.resetDriveEncoders();

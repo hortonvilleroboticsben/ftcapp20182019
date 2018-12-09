@@ -44,7 +44,7 @@ public class DemoTeleOp extends LinearOpMode {
             if (gamepad1.a && !gamepad1.start && launchOS) {
                 launching = true;
                 launchOS = false;
-                s.state_in_progress = 1;
+                s.reset();
             }
 
             if(!launching && !gamepad1.a && !gamepad1.start) launchOS = true;
@@ -52,13 +52,13 @@ public class DemoTeleOp extends LinearOpMode {
             if (launching) {
                 s.runStates(() -> {
                     r.resetEncoder("mtrArm");
-                    s.state_in_progress++;
+                    s.incrementState();
                 }, () -> {
                     r.setPower("mtrArm", -1);
                     if (r.hasMotorEncoderReached("mtrArm", -80)) {
                         r.setPower("mtrArm", 0);
                         r.resetEncoder("mtrArm");
-                        s.state_in_progress++;
+                        s.incrementState();
                     }
                 }, () -> {
                     r.runToTarget("mtrArm", 97, -.12);
@@ -66,10 +66,9 @@ public class DemoTeleOp extends LinearOpMode {
                         r.setPower("mtrArm", 0);
                         r.setRunMode("mtrArm", DcMotor.RunMode.RUN_USING_ENCODER);
                         launching = false;
-                        s.state_in_progress++;
+                        s.incrementState();
                     }
                 });
-                telemetry.addData("state", s.state_in_progress);
             }
 
             telemetry.addData("encoder", r.getEncoderCounts("mtrArm"));
