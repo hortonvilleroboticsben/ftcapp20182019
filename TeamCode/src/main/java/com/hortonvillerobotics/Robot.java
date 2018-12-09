@@ -500,8 +500,8 @@ public class Robot<T extends RobotConfiguration> {
 
             GrayF32 blueLayer = layers.getBand(2);
 //            int width = 2 * (blueLayer.width / 5), height = blueLayer.height;
-            int width = blueLayer.width/3, height = blueLayer.height;
-            GrayF32 subImage = blueLayer.subimage(0, 0, blueLayer.width/3, blueLayer.height);
+            int width = blueLayer.width/3-blueLayer.width/8, height = blueLayer.height;
+            GrayF32 subImage = blueLayer.subimage(blueLayer.width/8, 0, blueLayer.width/3, blueLayer.height);
 
             GrayU8 thresh = new GrayU8(width, height),
                     dilated = new GrayU8(width, height),
@@ -537,7 +537,7 @@ public class Robot<T extends RobotConfiguration> {
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
 
 
-            int requiredSize = 10000, numLarger = 0;
+            int requiredSize = 8000, numLarger = 0;
             Point2D_I32 p1 = null;
             for (Contour c : contours) {
                 int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;

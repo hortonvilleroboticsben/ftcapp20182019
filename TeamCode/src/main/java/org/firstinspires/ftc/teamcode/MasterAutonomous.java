@@ -106,6 +106,7 @@ public class MasterAutonomous extends LinearOpMode {
         },()->{
             rbt.analyzePhotoData();
         });
+        rbt.waitForFlag("ProcessLower");
 
         switch (rbt.blockLocation[0]){
             case "right":
