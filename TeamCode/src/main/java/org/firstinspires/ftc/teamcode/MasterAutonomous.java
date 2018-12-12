@@ -17,11 +17,11 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cameraView;
 import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cp;
 
-@Autonomous(name = "Autonomous",group = "competition")
+@Autonomous(name = "Autonomous", group = "competition")
 public class MasterAutonomous extends LinearOpMode {
 
     boolean crater = false;
-//    String blockPos = "";
+    //    String blockPos = "";
     StateMachine s = new StateMachine();
     long startPause = 0;
     boolean pauseOS = false, n = false;
@@ -29,21 +29,21 @@ public class MasterAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        Robot rbt = Robot.getInstance(this,new FinalRobotConfiguration());
+        Robot rbt = Robot.getInstance(this, new FinalRobotConfiguration());
         rbt.initialize(this, new FinalRobotConfiguration());
 
 //        FtcRobotControllerActivity.initCamera();
 
 
-        while(!opModeIsActive()){
-            s.runStates(()->{
+        while (!opModeIsActive()) {
+            s.runStates(() -> {
                 telemetry.addData("Crater Side", "A for Yes, B for No");
                 telemetry.update();
-                if((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !gamepad2.start){
+                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !gamepad2.start) {
                     crater = gamepad1.a;
                     n = true;
                 }
-                if(n && !gamepad1.a && !gamepad1.b) {
+                if (n && !gamepad1.a && !gamepad1.b) {
                     n = false;
                     s.incrementState();
                 }
@@ -59,12 +59,12 @@ public class MasterAutonomous extends LinearOpMode {
                     n = false;
                     s.incrementState();
                 }
-            }*/, ()->{
+            }*/, () -> {
                 telemetry.addData("Starting Pause", "DPad to Change, A to Confirm");
                 telemetry.addData("Current Pause", startPause);
                 telemetry.update();
 
-                if(!pauseOS) {
+                if (!pauseOS) {
                     if (gamepad1.dpad_up) {
                         startPause += 1000;
                         pauseOS = true;
@@ -72,43 +72,44 @@ public class MasterAutonomous extends LinearOpMode {
                         startPause -= 1000;
                         pauseOS = true;
                     }
-                }else if(!gamepad1.dpad_up && !gamepad1.dpad_down) pauseOS = false;
+                } else if (!gamepad1.dpad_up && !gamepad1.dpad_down) pauseOS = false;
 
-                if(gamepad1.a && !gamepad1.start && !gamepad2.start) n = true;
-                if(!gamepad1.a && n)s.incrementState();
+                if (gamepad1.a && !gamepad1.start && !gamepad2.start) n = true;
+                if (!gamepad1.a && n) s.incrementState();
 
-            }, ()->{
-                telemetry.addData("Ready To Go!","");
+            }, () -> {
+                telemetry.addData("Ready To Go!", "");
                 telemetry.update();
             });
         }
 
-        rbt.runParallel("ScanPause",()->{
-            rbt.pause(startPause);
-        },()->{
-            rbt.getCameraCapture();
-        });
+        rbt.runParallel("ScanPause",
+                () -> rbt.pause(startPause),
+                () -> rbt.getCameraCapture()
+        );
+
         rbt.waitForFlag("ScanPause");
 
-        rbt.runParallel("ProcessLower",()-> {
-            rbt.runToTarget("mtrLift", 5800, .72, true);
-            while (!rbt.hasMotorEncoderReached("mtrLift", 5790)) ;
-            rbt.setPower("mtrLift", 0);
+        rbt.runParallel("ProcessLower",
+                () -> {
+                    rbt.runToTarget("mtrLift", 5800, .72, true);
+                    while (!rbt.hasMotorEncoderReached("mtrLift", 5790)) ;
+                    rbt.setPower("mtrLift", 0);
 
-            rbt.owTurn(13.0, 0.23);
-            rbt.pause(50);
+                    rbt.owTurn(13.0, 0.23);
+                    rbt.pause(50);
 
-            rbt.owTurn(17.0, -0.23);
-            rbt.pause(50);
+                    rbt.owTurn(17.0, -0.23);
+                    rbt.pause(50);
 
-            rbt.owTurn(-93.5, 0.23);
-            rbt.pause(50);
-        },()->{
-            rbt.analyzePhotoData();
-        });
+                    rbt.owTurn(-93.5, 0.23);
+                    rbt.pause(50);
+                },
+                ()->rbt.analyzePhotoData()
+        );
         rbt.waitForFlag("ProcessLower");
 
-        switch (rbt.blockLocation[0]){
+        switch (rbt.blockLocation[0]) {
             case "right":
                 rbt.turn(-183, 0.23);
                 rbt.pause(50);
@@ -122,7 +123,7 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.turn(90, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(12,0.23);
+                rbt.drive(14, 0.23);
                 rbt.pause(50);
                 break;
             case "center":
@@ -135,14 +136,14 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-14, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(-64, 0.23);
+                rbt.owTurn(-63.5, 0.23);
                 rbt.pause(50);
 
                 rbt.drive(18, 0.23);
                 rbt.pause(50);
                 break;
             case "left":
-                rbt.turn(-120, 0.23);
+                rbt.turn(-118, 0.23);
                 rbt.pause(50);
 
                 rbt.drive(30, 0.23);
@@ -151,7 +152,7 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-18, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(-40, 0.23);
+                rbt.owTurn(-38.5, 0.23);
                 rbt.pause(50);
 
                 rbt.drive(8.75, 0.23);
@@ -159,22 +160,22 @@ public class MasterAutonomous extends LinearOpMode {
                 break;
         }
 
-        if(!crater){
-            rbt.drive(24, 0.23);
+        if (!crater) {
+            rbt.drive(22.75, 0.23);
             rbt.pause(50);
 
-            rbt.owTurn(137, -0.23);
+            rbt.owTurn(137.5, -0.23);
             rbt.pause(50);
 
-            rbt.drive(-20, 0.23);
+            rbt.drive(-18, 0.23);
             rbt.pause(50);
 
             rbt.pause(500);
-        }else{
+        } else {
             rbt.drive(23, 0.23);
             rbt.pause(50);
 
-            rbt.owTurn(45,-0.23);
+            rbt.owTurn(45, -0.23);
             rbt.pause(50);
 
             rbt.owTurn(-90, 0.23);

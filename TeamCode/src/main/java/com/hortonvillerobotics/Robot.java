@@ -490,9 +490,7 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     public void analyzePhotoData() {
-//        (new Thread(() -> {
 
-//            Planar<GrayF32> layers = ConvertBufferedImage.convertFromPlanar(originalBufferedImage, null, true, GrayF32.class);
         for (Bitmap bitmap : cameraSnapshots) {
             if(!opModeIsActive()) break;
             if (bitmap == null) continue;
@@ -500,37 +498,30 @@ public class Robot<T extends RobotConfiguration> {
 
             GrayF32 blueLayer = layers.getBand(2);
 //            int width = 2 * (blueLayer.width / 5), height = blueLayer.height;
-            int width = blueLayer.width/3-blueLayer.width/8, height = blueLayer.height;
-            GrayF32 subImage = blueLayer.subimage(blueLayer.width/8, 0, blueLayer.width/3, blueLayer.height);
+            int width = blueLayer.width, height = blueLayer.height / 2;
+            GrayF32 subImage = blueLayer.subimage(0, height, width, blueLayer.height);
 
             GrayU8 thresh = new GrayU8(width, height),
                     dilated = new GrayU8(width, height),
                     eroded = new GrayU8(width, height);
 
-            float threshold = 160;
+            float threshold = 190;
             ThresholdImageOps.threshold(subImage, thresh, threshold, false);
             BinaryImageOps.erode8(thresh, 2, eroded);
             BinaryImageOps.dilate8(eroded, 2, dilated);
 
             GrayU8 g = dilated.clone();
 
-//            for(int index = 0; index < g.data.length; index++) {
-//                if(g.data[index] > 0) g.data[index] = (byte) 255;
-//            }
-
             for(int x = 0; x < g.width; x++) {
                 for(int y = 0; y < g.height; y++) {
-                    if(g.get(x,y)>0) g.set(x,y,50);
+                    if(g.get(x,y)>0) g.set(x,y,100);
                 }
             }
-
-//            for(byte b : g.data)Log.d("ImageData",""+b);
-
 
             Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
             ByteArrayOutputStream outS = new ByteArrayOutputStream();
             b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
-            FileUtils.writeToFile("/"+3+".jpg", outS.toByteArray());
+            FileUtils.writeToFile("/out.jpg", outS.toByteArray());
 
 
             List<Contour> contours =
@@ -554,7 +545,7 @@ public class Robot<T extends RobotConfiguration> {
 
                 if (size > requiredSize) {
 
-//                    FileUtils.appendToFile("/sizes.txt", size+"\r\n");
+                    Log.d("SIZE", size+"");
 
                     int avg_x = 0, avg_y = 0;
                     for (Point2D_I32 p : c.external) {
@@ -574,10 +565,9 @@ public class Robot<T extends RobotConfiguration> {
                 }
             }
 
-            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.y > height / 2) ? "left" : "center" : "error";
+            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > 2 * width / 5) ? "left" : "center" : "error";
         }
 
-//        })).run();
     }
 
     public void lift(double distance, double power) {
