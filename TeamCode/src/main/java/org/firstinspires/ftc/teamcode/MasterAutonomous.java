@@ -130,10 +130,10 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.turn(-148, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(23, 0.23);
+                rbt.drive(19, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(-14, 0.23);
+                rbt.drive(-10, 0.23);
                 rbt.pause(50);
 
                 rbt.owTurn(-63.5, 0.23);
