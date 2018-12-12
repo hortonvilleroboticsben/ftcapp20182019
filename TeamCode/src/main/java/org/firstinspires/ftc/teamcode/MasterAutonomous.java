@@ -152,7 +152,7 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-18, 0.23);
                 rbt.pause(50);
 
-                rbt.owTurn(-38.5, 0.23);
+                rbt.owTurn(-35, 0.23);
                 rbt.pause(50);
 
                 rbt.drive(8.75, 0.23);
@@ -164,7 +164,7 @@ public class MasterAutonomous extends LinearOpMode {
             rbt.drive(22.75, 0.23);
             rbt.pause(50);
 
-            rbt.owTurn(137.5, -0.23);
+            rbt.owTurn(136.5, -0.23);
             rbt.pause(50);
 
             rbt.drive(-18, 0.23);

@@ -528,7 +528,7 @@ public class Robot<T extends RobotConfiguration> {
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
 
 
-            int requiredSize = 8000, numLarger = 0;
+            int requiredSize = 7500, numLarger = 0;
             Point2D_I32 p1 = null;
             for (Contour c : contours) {
                 int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
