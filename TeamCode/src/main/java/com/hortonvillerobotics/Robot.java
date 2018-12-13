@@ -9,12 +9,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
@@ -129,8 +131,17 @@ public class Robot<T extends RobotConfiguration> {
             try {
                 String sensorName = sensorData[0];
                 if (sensorData.length > 1) {
+
                     HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                     sensor.resetDeviceConfigurationForOpMode();
+
+                    if(sensor instanceof ModernRoboticsI2cColorSensor) {
+                        if(sensorData.length>2) {
+                            ((ModernRoboticsI2cColorSensor) sensor).setI2cAddress(new I2cAddr(Integer.parseInt(sensorData[3])));
+                        }
+                        ((ModernRoboticsI2cColorSensor) sensor).enableLed(true);
+                    }
+
                     sensors.put(sensorName, sensor);
                 }
             } catch (Exception e) {
@@ -455,19 +466,19 @@ public class Robot<T extends RobotConfiguration> {
     public void getCameraCapture() {
 
         CountDownLatch cdl = new CountDownLatch(1);
-        final int[] i = new int [1];
+        final int[] i = new int[1];
         i[0] = 0;
 
         FtcRobotControllerActivity.cp.mCamera.setPreviewCallback((bytes, camera) -> {
-            Log.i(TAG,"getCameraCapture: inside camera callback");
+            Log.i(TAG, "getCameraCapture: inside camera callback");
             Camera.Parameters parameters = camera.getParameters();
             parameters.getPreviewFormat();
             Camera.Size size = parameters.getPreviewSize();
             YuvImage image = new YuvImage(bytes, parameters.getPreviewFormat(),
                     size.width, size.height, null);
             ByteArrayOutputStream outS = new ByteArrayOutputStream();
-            image.compressToJpeg(new Rect(0,0,size.width, size.height),100, outS);
-            FileUtils.writeToFile("/"+i[0]+".jpg",outS.toByteArray());
+            image.compressToJpeg(new Rect(0, 0, size.width, size.height), 100, outS);
+            FileUtils.writeToFile("/" + i[0] + ".jpg", outS.toByteArray());
             out[i[0]++] = outS.toByteArray();
             cdl.countDown();
         });
@@ -482,7 +493,7 @@ public class Robot<T extends RobotConfiguration> {
             try {
                 cameraSnapshots[j] = BitmapFactory.decodeByteArray(out[j], 0, out[j].length);
             } catch (Exception e) {
-                Log.e(TAG,"getCameraCapture: something is null");
+                Log.e(TAG, "getCameraCapture: something is null");
                 e.printStackTrace();
             }
         }
@@ -492,7 +503,7 @@ public class Robot<T extends RobotConfiguration> {
     public void analyzePhotoData() {
 
         for (Bitmap bitmap : cameraSnapshots) {
-            if(!opModeIsActive()) break;
+            if (!opModeIsActive()) break;
             if (bitmap == null) continue;
             Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap, null, GrayF32.class, null);
 
@@ -512,9 +523,9 @@ public class Robot<T extends RobotConfiguration> {
 
             GrayU8 g = dilated.clone();
 
-            for(int x = 0; x < g.width; x++) {
-                for(int y = 0; y < g.height; y++) {
-                    if(g.get(x,y)>0) g.set(x,y,100);
+            for (int x = 0; x < g.width; x++) {
+                for (int y = 0; y < g.height; y++) {
+                    if (g.get(x, y) > 0) g.set(x, y, 100);
                 }
             }
 
@@ -545,7 +556,7 @@ public class Robot<T extends RobotConfiguration> {
 
                 if (size > requiredSize) {
 
-                    Log.d("SIZE", size+"");
+                    Log.d("SIZE", size + "");
 
                     int avg_x = 0, avg_y = 0;
                     for (Point2D_I32 p : c.external) {
