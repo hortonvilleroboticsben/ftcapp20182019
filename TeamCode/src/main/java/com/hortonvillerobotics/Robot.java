@@ -13,6 +13,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -135,11 +136,10 @@ public class Robot<T extends RobotConfiguration> {
                     HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                     sensor.resetDeviceConfigurationForOpMode();
 
-                    if(sensor instanceof ModernRoboticsI2cColorSensor) {
-                        if(sensorData.length>2) {
-                            ((ModernRoboticsI2cColorSensor) sensor).setI2cAddress(new I2cAddr(Integer.parseInt(sensorData[3])));
-                        }
-                        ((ModernRoboticsI2cColorSensor) sensor).enableLed(true);
+                    if(sensor instanceof ColorSensor) {
+                        Log.e("ROBOT", "SENSOR IS RIGHT TYPE");
+                        ((ColorSensor) sensor).setI2cAddress(I2cAddr.create8bit(Integer.parseInt(sensorData[1],16)));
+                        ((ColorSensor) sensor).enableLed(true);
                     }
 
                     sensors.put(sensorName, sensor);
@@ -239,16 +239,16 @@ public class Robot<T extends RobotConfiguration> {
 
     @Nullable
     public Integer getColorValue(String sensor, String channel){
-        if(sensors.get(sensor) != null && sensors.get(sensor) instanceof ModernRoboticsI2cColorSensor){
+        if(sensors.get(sensor) != null && sensors.get(sensor) instanceof ColorSensor){
             switch(channel){
                 case "red":
-                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).red();
+                    return ((ColorSensor) sensors.get(sensor)).red();
                 case "blue":
-                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).blue();
+                    return ((ColorSensor) sensors.get(sensor)).blue();
                 case "green":
-                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).green();
+                    return ((ColorSensor) sensors.get(sensor)).green();
                 case "alpha":
-                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).alpha();
+                    return ((ColorSensor) sensors.get(sensor)).alpha();
             }
         }
         return null;

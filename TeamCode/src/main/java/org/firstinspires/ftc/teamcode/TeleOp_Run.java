@@ -3,13 +3,18 @@ package org.firstinspires.ftc.teamcode;
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
 import com.hortonvillerobotics.Timer;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 
 @TeleOp(name="TeleOp", group="final")
 public class TeleOp_Run extends LinearOpMode {
     Robot r = Robot.getInstance(this, new FinalRobotConfiguration());
+
+    ModernRoboticsI2cColorSensor c;
 
     double srvPos = 0;
     Timer srvTimer = new Timer();
@@ -37,8 +42,14 @@ public class TeleOp_Run extends LinearOpMode {
                 srvTimer.reset();
             }
 
+
             r.setServoPosition("srvLock", srvPos);
 
+
+            telemetry.addData("leftRed", r.getColorValue("colorLeft", "red"));
+            telemetry.addData("leftBlue", r.getColorValue("colorLeft", "blue"));
+            telemetry.addData("rightRed", r.getColorValue("colorRight", "red"));
+            telemetry.addData("rightBlue", r.getColorValue("colorRight", "blue"));
             telemetry.addData("srvPos", srvPos);
             telemetry.update();
         }
