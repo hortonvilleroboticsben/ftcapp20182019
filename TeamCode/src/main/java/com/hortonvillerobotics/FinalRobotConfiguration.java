@@ -19,8 +19,8 @@ public class FinalRobotConfiguration extends RobotConfiguration {
             {"srvLock"}
     };
     private static String[][] sensors = {
-            {"colorLeft", "0x3c"},
-            {"colorRight", "0xcc"}
+            {"colorLeft", "0x4c"},
+            {"colorRight", "0x2a"}
     };
 
     public String[][] getMotors(){return motors;}
