@@ -237,6 +237,23 @@ public class Robot<T extends RobotConfiguration> {
         }
     }
 
+    @Nullable
+    public Integer getColorValue(String sensor, String channel){
+        if(sensors.get(sensor) != null && sensors.get(sensor) instanceof ModernRoboticsI2cColorSensor){
+            switch(channel){
+                case "red":
+                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).red();
+                case "blue":
+                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).blue();
+                case "green":
+                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).green();
+                case "alpha":
+                    return ((ModernRoboticsI2cColorSensor) sensors.get(sensor)).alpha();
+            }
+        }
+        return null;
+    }
+
     public void resetDriveEncoders() {
         resetEncoder("mtrLeftDrive");
         resetEncoder("mtrRightDrive");

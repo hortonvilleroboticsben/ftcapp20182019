@@ -104,6 +104,19 @@ public class MasterAutonomous extends LinearOpMode {
 
                     rbt.owTurn(-93.5, 0.23);
                     rbt.pause(50);
+
+                    rbt.runParallel("colorBack",()->{
+                        while(opModeIsActive() && rbt.getColorValue("colorLeft", "red") < 130 || rbt.getColorValue("colorLeft", "blue") < 130){
+                            rbt.setPower("mtrLeftDrive", -0.23);
+                        }
+                        rbt.setPower("mtrLeftDrive", 0.0);
+                    },()->{
+                        while(opModeIsActive() && rbt.getColorValue("colorRight", "red") < 130 || rbt.getColorValue("colorRight", "blue") < 130){
+                            rbt.setPower("mtrRightDrive", -0.23);
+                        }
+                        rbt.setPower("mtrRightDrive", 0.0);
+                    });
+                    rbt.waitForFlag("colorBack");
                 },
                 ()->rbt.analyzePhotoData()
         );
