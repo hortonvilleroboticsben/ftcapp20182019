@@ -107,18 +107,20 @@ public class MasterAutonomous extends LinearOpMode {
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);                    
                     rbt.runParallel("colorBack",()->{
-                        while(opModeIsActive() && rbt.getColorValue("colorLeft", "red") < 3 || rbt.getColorValue("colorLeft", "blue") < 3){
-                            rbt.setPower("mtrLeftDrive", -0.23);
+                        while(opModeIsActive() && rbt.getColorValue("colorLeft", "red") < 6 && rbt.getColorValue("colorLeft", "blue") < 6){
+                            rbt.setPower("mtrLeftDrive", -0.15);
                         }
                         rbt.setPower("mtrLeftDrive", 0.0);
                     },()->{
-                        while(opModeIsActive() && rbt.getColorValue("colorRight", "red") < 3 || rbt.getColorValue("colorRight", "blue") < 3){
-                            rbt.setPower("mtrRightDrive", -0.23);
+                        while(opModeIsActive() && rbt.getColorValue("colorRight", "red") < 6 && rbt.getColorValue("colorRight", "blue") < 6){
+                            rbt.setPower("mtrRightDrive", -0.15);
                         }
                         rbt.setPower("mtrRightDrive", 0.0);
                     });
                     
                     rbt.waitForFlag("colorBack");
+
+                    rbt.drive(-5, 0.23);
                 },
                 ()->rbt.analyzePhotoData()
         );
@@ -126,19 +128,19 @@ public class MasterAutonomous extends LinearOpMode {
 
         switch (rbt.blockLocation[0]) {
             case "right":
-                rbt.turn(-183, 0.23);
+                rbt.turn(-185, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(22, 0.23);
+                rbt.drive(19, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(-19, 0.23);
+                rbt.drive(-17, 0.23);
                 rbt.pause(50);
 
-                rbt.turn(90, 0.23);
+                rbt.turn(95, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(14, 0.23);
+                rbt.drive(12, 0.23);
                 rbt.pause(50);
                 break;
             case "center":
