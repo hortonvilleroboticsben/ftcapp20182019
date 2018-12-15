@@ -20,6 +20,9 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 @Autonomous(name = "Autonomous", group = "competition")
 public class MasterAutonomous extends LinearOpMode {
 
+    public final double LOCKCLOSED = 0.112;
+    public final double LOCKOPEN = 0.536;
+
     boolean crater = false;
     //    String blockPos = "";
     StateMachine s = new StateMachine();
@@ -31,6 +34,7 @@ public class MasterAutonomous extends LinearOpMode {
 
         Robot rbt = Robot.getInstance(this, new FinalRobotConfiguration());
         rbt.initialize(this, new FinalRobotConfiguration());
+        rbt.setServoPosition("srvLock", LOCKCLOSED);
 
 //        FtcRobotControllerActivity.initCamera();
 
@@ -90,10 +94,16 @@ public class MasterAutonomous extends LinearOpMode {
 
         rbt.waitForFlag("ScanPause");
 
+        rbt.setPower("mtrLift", -1);
+        rbt.pause(750);
+
+        rbt.setServoPosition("srvLock",LOCKOPEN);
+
         rbt.runParallel("ProcessLower",
                 () -> {
-                    rbt.runToTarget("mtrLift", 5800, .72, true);
-                    while (!rbt.hasMotorEncoderReached("mtrLift", 5790)) ;
+                    rbt.runToTarget("mtrLift", 5975, .72, true);
+                    while (!rbt.hasMotorEncoderReached("mtrLift", 5965));
+                    rbt.setServoPosition("srvLock", LOCKCLOSED);
                     rbt.setPower("mtrLift", 0);
 
                     rbt.owTurn(13.0, 0.23);
@@ -105,42 +115,40 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.owTurn(-93.5, 0.23);
                     rbt.pause(50);
 
-                    rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);                    
-                    rbt.runParallel("colorBack",()->{
-                        while(opModeIsActive() && rbt.getColorValue("colorLeft", "red") < 6 && rbt.getColorValue("colorLeft", "blue") < 6){
-                            rbt.setPower("mtrLeftDrive", -0.15);
-                        }
-                        rbt.setPower("mtrLeftDrive", 0.0);
-                    },()->{
-                        while(opModeIsActive() && rbt.getColorValue("colorRight", "red") < 6 && rbt.getColorValue("colorRight", "blue") < 6){
-                            rbt.setPower("mtrRightDrive", -0.15);
-                        }
-                        rbt.setPower("mtrRightDrive", 0.0);
-                    });
+                    rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rbt.setDrivePower(-0.08, -0.08);
+                    while(opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0){
+                        if(rbt.getColorValue("colorLeft", "red") >= 5 || rbt.getColorValue("colorLeft", "blue") >= 5)
+                                rbt.setPower("mtrLeftDrive", 0.0);
+                        if(rbt.getColorValue("colorRight", "red") >= 5 || rbt.getColorValue("colorRight", "blue") >= 5)
+                            rbt.setPower("mtrRightDrive", 0.0);
+                    }
                     
-                    rbt.waitForFlag("colorBack");
-
                     rbt.drive(-5, 0.23);
                 },
-                ()->rbt.analyzePhotoData()
+                ()->{
+                    rbt.analyzePhotoData();
+                    telemetry.addData("Decision",rbt.blockLocation[0]);
+                    telemetry.update();
+                }
         );
         rbt.waitForFlag("ProcessLower");
 
         switch (rbt.blockLocation[0]) {
             case "right":
-                rbt.turn(-185, 0.23);
+                rbt.turn(-187, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(19, 0.23);
+                rbt.drive(17, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(-17, 0.23);
+                rbt.drive(-15, 0.23);
                 rbt.pause(50);
 
-                rbt.turn(95, 0.23);
+                rbt.turn(94, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(12, 0.23);
+                rbt.drive(7, 0.23);
                 rbt.pause(50);
                 break;
             case "center":
@@ -156,11 +164,11 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.owTurn(-63.5, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(18, 0.23);
+                rbt.drive(12, 0.23);
                 rbt.pause(50);
                 break;
             case "left":
-                rbt.turn(-118, 0.23);
+                rbt.turn(-116.5, 0.23);
                 rbt.pause(50);
 
                 rbt.drive(30, 0.23);
@@ -172,13 +180,13 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.owTurn(-35, 0.23);
                 rbt.pause(50);
 
-                rbt.drive(8.75, 0.23);
+                rbt.drive(3.75, 0.23);
                 rbt.pause(50);
                 break;
         }
 
         if (!crater) {
-            rbt.drive(22.75, 0.23);
+            rbt.drive(27.75, 0.23);
             rbt.pause(50);
 
             rbt.owTurn(136.5, -0.23);
@@ -189,7 +197,7 @@ public class MasterAutonomous extends LinearOpMode {
 
             rbt.pause(500);
         } else {
-            rbt.drive(23, 0.23);
+            rbt.drive(36, 0.23);
             rbt.pause(50);
 
             rbt.owTurn(45, -0.23);

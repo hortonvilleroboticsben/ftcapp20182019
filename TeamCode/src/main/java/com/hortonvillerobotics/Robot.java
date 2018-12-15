@@ -556,8 +556,9 @@ public class Robot<T extends RobotConfiguration> {
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
 
 
-            int requiredSize = 7500, numLarger = 0;
+            int requiredSize = 7250, numLarger = 0;
             Point2D_I32 p1 = null;
+            FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
                 int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
                 if (c.external.size() == 0) continue;
@@ -570,6 +571,8 @@ public class Robot<T extends RobotConfiguration> {
                 int w = maxX - minX;
                 int h = maxY - minY;
                 int size = w * h;
+
+                FileUtils.appendToFile("/sizes.txt", size+"\r\n");
 
                 if (size > requiredSize) {
 
@@ -593,7 +596,7 @@ public class Robot<T extends RobotConfiguration> {
                 }
             }
 
-            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > 2 * width / 5) ? "left" : "center" : "error";
+            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > width / 2) ? "left" : "center" : "error";
         }
 
     }

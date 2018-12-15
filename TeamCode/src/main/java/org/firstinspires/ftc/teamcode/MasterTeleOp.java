@@ -4,16 +4,13 @@ import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
 import com.hortonvillerobotics.Timer;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.I2cAddr;
 
-@TeleOp(name="TeleOp_Run", group="final")
-@Disabled
-public class TeleOp_Run extends LinearOpMode {
+@TeleOp(name="TeleOp", group="competition")
+public class MasterTeleOp extends LinearOpMode {
+
     Robot r = Robot.getInstance(this, new FinalRobotConfiguration());
 
     ModernRoboticsI2cColorSensor c;
@@ -28,7 +25,10 @@ public class TeleOp_Run extends LinearOpMode {
         r.setRunMode("mtrLift", DcMotor.RunMode.RUN_USING_ENCODER);
         while(!opModeIsActive()){}
         while(opModeIsActive()){
-//            ((DcMotor) r.motors.get("mtrLeftDrive")).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            //CONTROLLER 1 CONTROLS
+            //CONTROLLER 1 CONTROLS
+
             r.setDrivePower(Math.abs(gamepad1.left_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.3 : 0.72) * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.3 : 0.72) * gamepad1.right_stick_y : 0);
             r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
             for(Object s : r.motors.keySet()){
@@ -47,6 +47,16 @@ public class TeleOp_Run extends LinearOpMode {
 
             r.setServoPosition("srvLock", srvPos);
 
+
+            //CONTROLLER 2 CONTROLS
+            //CONTROLLER 2 CONTROLS
+
+            r.setPower("mtrCrane",gamepad2.left_stick_y);
+
+
+
+
+            //GIVING DRIVER FEEDBACK
 
             telemetry.addData("leftRed", r.getColorValue("colorLeft", "red"));
             telemetry.addData("leftBlue", r.getColorValue("colorLeft", "blue"));
