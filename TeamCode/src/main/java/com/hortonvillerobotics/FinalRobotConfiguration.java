@@ -14,14 +14,14 @@ public class FinalRobotConfiguration extends RobotConfiguration {
             {"mtrLeftDrive", "forward"},
             {"mtrRightDrive", "reverse"},
             {"mtrLift", "reverse"},
-            {"mtrCrane","forward"},
+            {"mtrCrane","reverse"},
             {"mtrLin","forward"}
     };
     private static String[][] servos = {
             {"srvLock"},
             {"srvTrigger"},
-            {"srvColL"},
-            {"srvColR"}
+            {"srvColL","continuous"},
+            {"srvColR","continuous"}
     };
     private static String[][] sensors = {
             {"colorLeft", "3a"},

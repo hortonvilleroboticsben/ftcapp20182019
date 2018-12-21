@@ -76,6 +76,10 @@ public class Robot<T extends RobotConfiguration> {
         void executeTasks();
     }
 
+    public interface VelocityTask{
+        double getSample();
+    }
+
     private Robot(OpMode opMode, T config) {
         initialize(opMode, config);
     }
@@ -288,6 +292,13 @@ public class Robot<T extends RobotConfiguration> {
 
     public boolean opModeIsActive() {
         return opMode instanceof LinearOpMode && ((LinearOpMode) opMode).opModeIsActive();
+    }
+
+    public double calculateVelocity(VelocityTask t, long sampleTimeMS){
+        Timer timer = new Timer();
+        double startVal = t.getSample();
+        while(!timer.hasTimeElapsed(sampleTimeMS));
+        return (t.getSample() - startVal)/sampleTimeMS*1000.;
     }
 
     public void setServoPosition(@NonNull String servoName, double position) {
