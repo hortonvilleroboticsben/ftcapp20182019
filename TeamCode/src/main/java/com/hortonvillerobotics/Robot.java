@@ -90,6 +90,7 @@ public class Robot<T extends RobotConfiguration> {
         servos = new HashMap<>();
         sensors = new HashMap<>();
         cameraSnapshots = new Bitmap[3];
+        flags.clear();
 
         for (String[] motorData : config.getMotors()) {
             try {
@@ -106,6 +107,8 @@ public class Robot<T extends RobotConfiguration> {
                 } else {
                     motor.setDirection(DcMotorSimple.Direction.FORWARD);
                 }
+
+                motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                 motors.put(motorName, motor);
             } catch (Exception e) {
@@ -304,26 +307,17 @@ public class Robot<T extends RobotConfiguration> {
     public void setServoPosition(@NonNull String servoName, double position) {
         HardwareDevice servo = servos.get(servoName);
         if (servo != null) {
-            if (servo instanceof Servo) {
-                ((Servo) servo).setPosition(position);
-            } else if (servo instanceof CRServo) {
-                Log.e(TAG, "setServoPosition: tried setting position of CR servo: " + servoName);
-            } else {
-                Log.println(Log.ASSERT, TAG, "setServoPosition: non-servo object in servo map: " + servoName);
-            }
+            if (servo instanceof Servo) ((Servo) servo).setPosition(position);
+            else if (servo instanceof CRServo) setServoPower(servoName, position);
         } else Log.e(TAG, "setServoPosition: servo is null: " + servoName);
     }
 
     public void setServoPower(@NonNull String servoName, double power) {
         HardwareDevice servo = servos.get(servoName);
         if (servo != null) {
-            if (servo instanceof CRServo) {
-                ((CRServo) servo).setPower(power);
-            } else if (servo instanceof Servo) {
-                Log.e(TAG, "setServoPower: tried setting power of non CR servo: " + servoName);
-            } else {
-                Log.println(Log.ASSERT, TAG, "setServoPower: non-servo object in servo map: " + servoName);
-            }
+            if (servo instanceof CRServo) ((CRServo) servo).setPower(power);
+            else if (servo instanceof Servo) setServoPosition(servoName, power);
+
         } else Log.e(TAG, "setServoPower: CR servo is null: " + servoName);
     }
 
