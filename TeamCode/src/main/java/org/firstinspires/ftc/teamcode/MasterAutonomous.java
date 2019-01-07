@@ -99,17 +99,17 @@ public class MasterAutonomous extends LinearOpMode {
 
         rbt.setPower("mtrLift", -1);
         sleep(100);
-        rbt.setServoPosition("srvLock",LOCKOPEN);
+        rbt.setServoPosition("srvLock", LOCKOPEN);
         sleep(250);
 
         rbt.runParallel("ProcessLower",
                 () -> {
                     rbt.setPower("mtrLift", 0.72);
                     sleep(1000);
-                    while (rbt.calculateVelocity(()->rbt.getEncoderCounts("mtrLift"), 50) > 50);
+                    while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 50) > 50) ;
                     rbt.setServoPosition("srvLock", LOCKCLOSED);
-                    rbt.runToTarget("mtrLift", -500, -.72, true);
-                    while(!rbt.hasMotorEncoderReached("mtrLift", -490));
+                    rbt.runToTarget("mtrLift", -600, -.72, true);
+                    while (!rbt.hasMotorEncoderReached("mtrLift", -590)) ;
                     rbt.setRunMode("mtrLift", DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setPower("mtrLift", 0);
 
@@ -123,7 +123,13 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.owTurn(17.0, -0.23);
                     rbt.pause(50);
 
-                    rbt.owTurn(-93.5, 0.23);
+                    rbt.owTurn(-45, 0.23);
+                    rbt.pause(50);
+
+                    rbt.owTurn(45, 0.23);
+                    rbt.pause(50);
+
+                    rbt.owTurn(-90, -0.23);
                     rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -135,21 +141,25 @@ public class MasterAutonomous extends LinearOpMode {
                             if (rbt.getColorValue("colorRight", "red") >= 5 || rbt.getColorValue("colorRight", "blue") >= 5)
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
-                    }catch(Exception e){
-                        rbt.setDrivePower(0,0);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        rbt.setDrivePower(0, 0);
                     }
-                    
+
                     rbt.drive(-5, 0.23);
                 },
-                ()->{
+                () -> {
                     rbt.analyzePhotoData();
-                    telemetry.addData("Decision",rbt.blockLocation[0]).setRetained(true);
-                    telemetry.addData("mtrLeft RunMode", ((DcMotor) rbt.motors.get("mtrLeftDrive")).getMode()).setRetained(true);
+                    telemetry.addData("Decision", rbt.blockLocation[0]).setRetained(true);
+//                    telemetry.addData("mtrLeft RunMode", ((DcMotor) rbt.motors.get("mtrLeftDrive")).getMode()).setRetained(true);
                     telemetry.update();
                 }
         );
         rbt.waitForFlag("ProcessLower");
 
+        //TODO:Extend Mineral System and place the Team Marker
+
+        //TODO:Fix the positioning of the minerals
         switch (rbt.blockLocation[0]) {
             case "right":
                 rbt.turn(-187, 0.23);
@@ -165,22 +175,6 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.pause(50);
 
                 rbt.drive(7, 0.23);
-                rbt.pause(50);
-                break;
-            case "center":
-                rbt.turn(-148, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(19, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(-10, 0.23);
-                rbt.pause(50);
-
-                rbt.owTurn(-63.5, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(12, 0.23);
                 rbt.pause(50);
                 break;
             case "left":
@@ -199,19 +193,39 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(3.75, 0.23);
                 rbt.pause(50);
                 break;
+            //case "center" and error guess
+            default:
+                rbt.turn(-148, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(19, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(-10, 0.23);
+                rbt.pause(50);
+
+                rbt.owTurn(-63.5, 0.23);
+                rbt.pause(50);
+
+                rbt.drive(12, 0.23);
+                rbt.pause(50);
+                break;
         }
 
         if (!crater) {
-            rbt.drive(27.75, 0.23);
+            rbt.turn(-90, 0.23);
             rbt.pause(50);
 
-            rbt.owTurn(136.5, -0.23);
+            rbt.drive(32, 0.23);
             rbt.pause(50);
 
-            rbt.drive(-18, 0.23);
+            rbt.turn(rbt.blockLocation[0].equals("left") ? -25 : -35, 0.23);
             rbt.pause(50);
 
-            rbt.pause(500);
+            rbt.drive(28, 0.23);
+            rbt.pause(50);
+
+            //TODO:Extend Mineral System into Crater
         } else {
             rbt.drive(36, 0.23);
             rbt.pause(50);
