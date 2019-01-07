@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -95,6 +96,7 @@ public class TeleOp_Run extends LinearOpMode {
 
             //UPDATING TELEMETRY FOR THE USER
             telemetry.addData("isLocked", isLocked);
+            telemetry.addData("srvLock Position", ((Servo) r.servos.get("srvLock")).getPosition());
             for(Object s : r.motors.keySet()){
                 telemetry.addData((String) s, r.getPower((String)s));
                 telemetry.addData((String) s + " enc", r.getEncoderCounts((String) s));

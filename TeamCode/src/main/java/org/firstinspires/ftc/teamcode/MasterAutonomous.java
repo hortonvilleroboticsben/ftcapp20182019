@@ -20,7 +20,7 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 @Autonomous(name = "Autonomous", group = "competition")
 public class MasterAutonomous extends LinearOpMode {
 
-    public final double LOCKCLOSED = 0.112;
+    public final double LOCKCLOSED = 0.117;
     public final double LOCKOPEN = 0.536;
 
     boolean crater = false;
@@ -35,6 +35,7 @@ public class MasterAutonomous extends LinearOpMode {
         Robot rbt = Robot.getInstance(this, new FinalRobotConfiguration());
         rbt.initialize(this, new FinalRobotConfiguration());
         rbt.setServoPosition("srvLock", LOCKCLOSED);
+        rbt.setRunMode("mtrLift", DcMotor.RunMode.RUN_USING_ENCODER);
 
 //        FtcRobotControllerActivity.initCamera();
 
@@ -68,6 +69,8 @@ public class MasterAutonomous extends LinearOpMode {
                 telemetry.addData("Current Pause", startPause);
                 telemetry.update();
 
+                startPause = startPause < 0 ? 0 : startPause > 30000 ? 30000 : startPause;
+
                 if (!pauseOS) {
                     if (gamepad1.dpad_up) {
                         startPause += 1000;
@@ -95,16 +98,24 @@ public class MasterAutonomous extends LinearOpMode {
         rbt.waitForFlag("ScanPause");
 
         rbt.setPower("mtrLift", -1);
-        rbt.pause(750);
-
+        sleep(100);
         rbt.setServoPosition("srvLock",LOCKOPEN);
+        sleep(250);
 
         rbt.runParallel("ProcessLower",
                 () -> {
-                    rbt.runToTarget("mtrLift", 5975, .72, true);
-                    while (!rbt.hasMotorEncoderReached("mtrLift", 5965));
+                    rbt.setPower("mtrLift", 0.72);
+                    sleep(1000);
+                    while (rbt.calculateVelocity(()->rbt.getEncoderCounts("mtrLift"), 50) > 50);
                     rbt.setServoPosition("srvLock", LOCKCLOSED);
+                    rbt.runToTarget("mtrLift", -500, -.72, true);
+                    while(!rbt.hasMotorEncoderReached("mtrLift", -490));
+                    rbt.setRunMode("mtrLift", DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setPower("mtrLift", 0);
+
+//                    rbt.runDriveToTarget(2000,.5,2000,.5);
+//                    while(!rbt.hasMotorEncoderReached("mtrLeftDrive", 1990));
+//                    rbt.setDrivePower(0,0);
 
                     rbt.owTurn(13.0, 0.23);
                     rbt.pause(50);
@@ -117,18 +128,23 @@ public class MasterAutonomous extends LinearOpMode {
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setDrivePower(-0.08, -0.08);
-                    while(opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0){
-                        if(rbt.getColorValue("colorLeft", "red") >= 5 || rbt.getColorValue("colorLeft", "blue") >= 5)
+                    try {
+                        while (opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0) {
+                            if (rbt.getColorValue("colorLeft", "red") >= 5 || rbt.getColorValue("colorLeft", "blue") >= 5)
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                        if(rbt.getColorValue("colorRight", "red") >= 5 || rbt.getColorValue("colorRight", "blue") >= 5)
-                            rbt.setPower("mtrRightDrive", 0.0);
+                            if (rbt.getColorValue("colorRight", "red") >= 5 || rbt.getColorValue("colorRight", "blue") >= 5)
+                                rbt.setPower("mtrRightDrive", 0.0);
+                        }
+                    }catch(Exception e){
+                        rbt.setDrivePower(0,0);
                     }
                     
                     rbt.drive(-5, 0.23);
                 },
                 ()->{
                     rbt.analyzePhotoData();
-                    telemetry.addData("Decision",rbt.blockLocation[0]);
+                    telemetry.addData("Decision",rbt.blockLocation[0]).setRetained(true);
+                    telemetry.addData("mtrLeft RunMode", ((DcMotor) rbt.motors.get("mtrLeftDrive")).getMode()).setRetained(true);
                     telemetry.update();
                 }
         );
