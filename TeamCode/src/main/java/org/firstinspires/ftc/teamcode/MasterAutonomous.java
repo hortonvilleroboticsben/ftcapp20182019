@@ -20,14 +20,16 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 @Autonomous(name = "Autonomous", group = "competition")
 public class MasterAutonomous extends LinearOpMode {
 
-    public final double LOCKCLOSED = 0.117;
-    public final double LOCKOPEN = 0.536;
+    private final double LOCKCLOSED = 0.117;
+    private final double LOCKOPEN = 0.536;
 
-    boolean crater = false;
+    private Integer leftRed, leftBlue, rightRed, rightBlue;
+
+    private boolean crater = false;
     //    String blockPos = "";
-    StateMachine s = new StateMachine();
-    long startPause = 0;
-    boolean pauseOS = false, n = false;
+    private StateMachine s = new StateMachine();
+    private long startPause = 0;
+    private boolean pauseOS = false, n = false;
 
     @Override
     public void runOpMode() {
@@ -132,21 +134,38 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.owTurn(-90, -0.23);
                     rbt.pause(50);
 
+                    //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
+                    rbt.drive(-7,.23);
+                    rbt.pause(50);
+
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setDrivePower(0.1, 0.1);
+                    rbt.setDrivePower(0.05, 0.05);
                     try {
                         while (opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0) {
-                            if (rbt.getColorValue("colorLeft", "red") >= 5 || rbt.getColorValue("colorLeft", "blue") >= 5)
+
+                            leftBlue = rbt.getColorValue("colorLeft","blue");
+                            leftRed = rbt.getColorValue("colorLeft","red");
+
+                            rightBlue = rbt.getColorValue("colorRight","blue");
+                            rightRed = rbt.getColorValue("colorRight","red");
+
+                            telemetry.addData("leftRed",leftRed);
+                            telemetry.addData("leftBlue",leftBlue);
+                            telemetry.addData("rightRed",rightRed);
+                            telemetry.addData("rightBlue",rightBlue);
+                            telemetry.update();
+
+                            if ((leftRed!=null && leftRed >= 5) || (leftBlue!=null && leftBlue >= 5))
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                            if (rbt.getColorValue("colorRight", "red") >= 5 || rbt.getColorValue("colorRight", "blue") >= 5)
+                            if ((rightRed!=null && rightRed >= 5) || (rightBlue!=null && rightBlue >= 5))
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                         rbt.setDrivePower(0, 0);
                     }
-
-                    rbt.drive(-5, 0.23);
+                    rbt.pause(50);
+                    rbt.drive(5, 0.2);
                 },
                 () -> {
                     rbt.analyzePhotoData();
@@ -162,80 +181,98 @@ public class MasterAutonomous extends LinearOpMode {
         //TODO:Fix the positioning of the minerals
         switch (rbt.blockLocation[0]) {
             case "right":
-                rbt.turn(-187, 0.23);
+//                rbt.turn(-187, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(17, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(-15, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.turn(94, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(7, 0.23);
+//                rbt.pause(50);
+                rbt.turn(-45,.23);
                 rbt.pause(50);
-
-                rbt.drive(17, 0.23);
+                rbt.drive(26,.23);
                 rbt.pause(50);
-
-                rbt.drive(-15, 0.23);
-                rbt.pause(50);
-
-                rbt.turn(94, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(7, 0.23);
-                rbt.pause(50);
+                rbt.drive(-7,.23);
                 break;
             case "left":
-                rbt.turn(-116.5, 0.23);
-                rbt.pause(50);
+//                rbt.turn(-116.5, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(30, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(-18, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.owTurn(-35, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(3.75, 0.23);
+//                rbt.pause(50);
 
-                rbt.drive(30, 0.23);
+                rbt.turn(45,.23);
                 rbt.pause(50);
-
-                rbt.drive(-18, 0.23);
+                rbt.drive(29,.23);
                 rbt.pause(50);
-
-                rbt.owTurn(-35, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(3.75, 0.23);
-                rbt.pause(50);
+                rbt.drive(-7,.23);
                 break;
             //case "center" and error guess
             default:
-                rbt.turn(-148, 0.23);
-                rbt.pause(50);
+//                rbt.turn(-148, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(19, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(-10, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.owTurn(-63.5, 0.23);
+//                rbt.pause(50);
+//
+//                rbt.drive(12, 0.23);
+//                rbt.pause(50);
 
-                rbt.drive(19, 0.23);
+                rbt.turn(10,.23);
                 rbt.pause(50);
-
-                rbt.drive(-10, 0.23);
+                rbt.drive(24,.23);
                 rbt.pause(50);
-
-                rbt.owTurn(-63.5, 0.23);
-                rbt.pause(50);
-
-                rbt.drive(12, 0.23);
-                rbt.pause(50);
+                rbt.drive(-9,.23);
                 break;
         }
 
-        if (!crater) {
-            rbt.turn(-90, 0.23);
-            rbt.pause(50);
-
-            rbt.drive(32, 0.23);
-            rbt.pause(50);
-
-            rbt.turn(rbt.blockLocation[0].equals("left") ? -25 : -35, 0.23);
-            rbt.pause(50);
-
-            rbt.drive(28, 0.23);
-            rbt.pause(50);
-
-            //TODO:Extend Mineral System into Crater
-        } else {
-            rbt.drive(36, 0.23);
-            rbt.pause(50);
-
-            rbt.owTurn(45, -0.23);
-            rbt.pause(50);
-
-            rbt.owTurn(-90, 0.23);
-            rbt.pause(50);
-        }
+        //TODO FIX THIS ENTIRE COMMENTED BLOCK
+//        if (!crater) {
+//            rbt.turn(-90, 0.23);
+//            rbt.pause(50);
+//
+//            rbt.drive(32, 0.23);
+//            rbt.pause(50);
+//
+//            rbt.turn(rbt.blockLocation[0].equals("left") ? -25 : -35, 0.23);
+//            rbt.pause(50);
+//
+//            rbt.drive(28, 0.23);
+//            rbt.pause(50);
+//
+//            //TODO:Extend Mineral System into Crater
+//        } else {
+//            rbt.drive(36, 0.23);
+//            rbt.pause(50);
+//
+//            rbt.owTurn(45, -0.23);
+//            rbt.pause(50);
+//
+//            rbt.owTurn(-90, 0.23);
+//            rbt.pause(50);
+//        }
 
 
     }
