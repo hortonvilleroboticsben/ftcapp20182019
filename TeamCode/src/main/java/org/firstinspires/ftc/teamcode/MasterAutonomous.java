@@ -133,7 +133,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setDrivePower(-0.08, -0.08);
+                    rbt.setDrivePower(0.1, 0.1);
                     try {
                         while (opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0) {
                             if (rbt.getColorValue("colorLeft", "red") >= 5 || rbt.getColorValue("colorLeft", "blue") >= 5)
