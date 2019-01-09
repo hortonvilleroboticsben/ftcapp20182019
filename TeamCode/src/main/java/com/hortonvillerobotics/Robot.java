@@ -602,6 +602,7 @@ public class Robot<T extends RobotConfiguration> {
             }
 
             blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > width / 2) ? "left" : "center" : "error";
+            bitmap = null;
         }
 
     }

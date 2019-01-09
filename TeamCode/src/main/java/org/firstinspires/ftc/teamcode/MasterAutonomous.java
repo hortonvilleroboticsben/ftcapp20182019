@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.hardware.Camera;
 import android.os.Looper;
+import android.util.Log;
 
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
@@ -22,6 +23,8 @@ public class MasterAutonomous extends LinearOpMode {
 
     private final double LOCKCLOSED = 0.117;
     private final double LOCKOPEN = 0.536;
+    
+    private final double SAFESPEED = .23;
 
     private Integer leftRed, leftBlue, rightRed, rightBlue;
 
@@ -100,9 +103,9 @@ public class MasterAutonomous extends LinearOpMode {
         rbt.waitForFlag("ScanPause");
 
         rbt.setPower("mtrLift", -1);
-        sleep(100);
+        sleep(150);
         rbt.setServoPosition("srvLock", LOCKOPEN);
-        sleep(250);
+        sleep(400);
 
         rbt.runParallel("ProcessLower",
                 () -> {
@@ -119,29 +122,32 @@ public class MasterAutonomous extends LinearOpMode {
 //                    while(!rbt.hasMotorEncoderReached("mtrLeftDrive", 1990));
 //                    rbt.setDrivePower(0,0);
 
-                    rbt.owTurn(13.0, 0.23);
+                    rbt.owTurn(13.0, SAFESPEED);
                     rbt.pause(50);
 
-                    rbt.owTurn(17.0, -0.23);
+                    rbt.owTurn(14.0, -SAFESPEED);
                     rbt.pause(50);
 
-                    rbt.owTurn(-45, 0.23);
+                    rbt.owTurn(-15, SAFESPEED); //changed from -45
+                    rbt.pause(50);
+                    
+                    rbt.drive(1,SAFESPEED);
                     rbt.pause(50);
 
-                    rbt.owTurn(45, 0.23);
+                    rbt.owTurn(15, SAFESPEED); //changed from 45
                     rbt.pause(50);
 
-                    rbt.owTurn(-90, -0.23);
+                    rbt.owTurn(-91.5, -SAFESPEED);
                     rbt.pause(50);
 
                     //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
-                    rbt.drive(-7,.23);
-                    rbt.pause(50);
+//                    rbt.drive(-7,SAFESPEED);
+//                    rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setDrivePower(0.05, 0.05);
+                    rbt.setDrivePower(0.08, 0.08);
                     try {
-                        while (opModeIsActive() && rbt.getPower("mtrLeftDrive") != 0 && rbt.getPower("mtrRightDrive") != 0) {
+                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
 
                             leftBlue = rbt.getColorValue("colorLeft","blue");
                             leftRed = rbt.getColorValue("colorLeft","red");
@@ -164,6 +170,8 @@ public class MasterAutonomous extends LinearOpMode {
                         e.printStackTrace();
                         rbt.setDrivePower(0, 0);
                     }
+//                    Log.d("MasterAutonomous","Left red: " + leftRed + " Left blue: " + leftBlue
+//                    + " Right red: " + rightRed + " Right blue: " + rightBlue);
                     rbt.pause(50);
                     rbt.drive(5, 0.2);
                 },
@@ -176,103 +184,43 @@ public class MasterAutonomous extends LinearOpMode {
         );
         rbt.waitForFlag("ProcessLower");
 
-        //TODO:Extend Mineral System and place the Team Marker
+        if(!crater) {
+            //TODO:Extend Mineral System and place the Team Marker if on non-crater side
+        }
 
         //TODO:Fix the positioning of the minerals
         switch (rbt.blockLocation[0]) {
             case "right":
-//                rbt.turn(-187, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(17, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(-15, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.turn(94, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(7, 0.23);
-//                rbt.pause(50);
-                rbt.turn(-45,.23);
+                rbt.turn(-33,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(26,.23);
+                rbt.drive(26,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-7,.23);
+                rbt.drive(-7,SAFESPEED);
                 break;
             case "left":
-//                rbt.turn(-116.5, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(30, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(-18, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.owTurn(-35, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(3.75, 0.23);
-//                rbt.pause(50);
-
-                rbt.turn(45,.23);
+                rbt.turn(38,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(29,.23);
+                rbt.drive(29,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-7,.23);
+                rbt.drive(-7,SAFESPEED);
                 break;
             //case "center" and error guess
             default:
-//                rbt.turn(-148, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(19, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(-10, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.owTurn(-63.5, 0.23);
-//                rbt.pause(50);
-//
-//                rbt.drive(12, 0.23);
-//                rbt.pause(50);
-
-                rbt.turn(10,.23);
+                rbt.turn(10,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(24,.23);
+                rbt.drive(24,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-9,.23);
+                rbt.drive(-9,SAFESPEED);
                 break;
         }
 
-        //TODO FIX THIS ENTIRE COMMENTED BLOCK
-//        if (!crater) {
-//            rbt.turn(-90, 0.23);
-//            rbt.pause(50);
-//
-//            rbt.drive(32, 0.23);
-//            rbt.pause(50);
-//
-//            rbt.turn(rbt.blockLocation[0].equals("left") ? -25 : -35, 0.23);
-//            rbt.pause(50);
-//
-//            rbt.drive(28, 0.23);
-//            rbt.pause(50);
-//
-//            //TODO:Extend Mineral System into Crater
-//        } else {
-//            rbt.drive(36, 0.23);
-//            rbt.pause(50);
-//
-//            rbt.owTurn(45, -0.23);
-//            rbt.pause(50);
-//
-//            rbt.owTurn(-90, 0.23);
-//            rbt.pause(50);
-//        }
+        if(crater) {
+
+        } else {
+
+        }
+
+
 
 
     }
