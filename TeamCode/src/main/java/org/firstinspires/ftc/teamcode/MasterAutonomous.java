@@ -45,7 +45,7 @@ public class MasterAutonomous extends LinearOpMode {
 //        FtcRobotControllerActivity.initCamera();
 
 
-        while (!opModeIsActive()) {
+        while (!opModeIsActive() && !isStopRequested()) {
             s.runStates(() -> {
                 telemetry.addData("Crater Side", "A for Yes, B for No");
                 telemetry.update();
@@ -131,18 +131,19 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.owTurn(-15, SAFESPEED); //changed from -45
                     rbt.pause(50);
                     
-                    rbt.drive(1,SAFESPEED);
-                    rbt.pause(50);
+//                    rbt.drive(1,SAFESPEED);
+//                    rbt.pause(50);
 
                     rbt.owTurn(15, SAFESPEED); //changed from 45
                     rbt.pause(50);
 
-                    rbt.owTurn(-91.5, -SAFESPEED);
+                    rbt.owTurn(-35, -SAFESPEED);
+                    rbt.turn(-56.5, SAFESPEED);
                     rbt.pause(50);
 
                     //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
-//                    rbt.drive(-7,SAFESPEED);
-//                    rbt.pause(50);
+                    rbt.drive(4,SAFESPEED);
+                    rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setDrivePower(0.08, 0.08);
@@ -193,14 +194,14 @@ public class MasterAutonomous extends LinearOpMode {
             case "right":
                 rbt.turn(-33,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(26,SAFESPEED);
+                rbt.drive(23,SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(-7,SAFESPEED);
                 break;
             case "left":
                 rbt.turn(38,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(29,SAFESPEED);
+                rbt.drive(25,SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(-7,SAFESPEED);
                 break;
@@ -208,7 +209,7 @@ public class MasterAutonomous extends LinearOpMode {
             default:
                 rbt.turn(10,SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(24,SAFESPEED);
+                rbt.drive(20,SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(-9,SAFESPEED);
                 break;
