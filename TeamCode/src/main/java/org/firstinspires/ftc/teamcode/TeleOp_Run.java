@@ -95,6 +95,12 @@ public class TeleOp_Run extends LinearOpMode {
 
 
             //UPDATING TELEMETRY FOR THE USER
+
+            telemetry.addData("leftRed", r.getColorValue("colorLeft", "red"));
+            telemetry.addData("leftBlue", r.getColorValue("colorLeft", "blue"));
+            telemetry.addData("rightRed", r.getColorValue("colorRight", "red"));
+            telemetry.addData("rightBlue", r.getColorValue("colorRight", "blue"));
+
             telemetry.addData("isLocked", isLocked);
             telemetry.addData("srvLock Position", ((Servo) r.servos.get("srvLock")).getPosition());
             for(Object s : r.motors.keySet()){
