@@ -22,8 +22,8 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 public class MasterAutonomous extends LinearOpMode {
 
     private final double LOCKCLOSED = 0.117;
-    private final double LOCKOPEN = 0.536;
-    
+    private final double LOCKOPEN = 0.55; //.536
+
     private final double SAFESPEED = .23;
 
     private Integer leftRed, leftBlue, rightRed, rightBlue;
@@ -103,9 +103,9 @@ public class MasterAutonomous extends LinearOpMode {
         rbt.waitForFlag("ScanPause");
 
         rbt.setPower("mtrLift", -1);
-        sleep(150);
+        sleep(100);
         rbt.setServoPosition("srvLock", LOCKOPEN);
-        sleep(400);
+        sleep(500);
 
         rbt.runParallel("ProcessLower",
                 () -> {
@@ -130,7 +130,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                     rbt.owTurn(-15, SAFESPEED); //changed from -45
                     rbt.pause(50);
-                    
+
 //                    rbt.drive(1,SAFESPEED);
 //                    rbt.pause(50);
 
@@ -142,7 +142,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.pause(50);
 
                     //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
-                    rbt.drive(4,SAFESPEED);
+                    rbt.drive(4, SAFESPEED);
                     rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -150,21 +150,21 @@ public class MasterAutonomous extends LinearOpMode {
                     try {
                         while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
 
-                            leftBlue = rbt.getColorValue("colorLeft","blue");
-                            leftRed = rbt.getColorValue("colorLeft","red");
+                            leftBlue = rbt.getColorValue("colorLeft", "blue");
+                            leftRed = rbt.getColorValue("colorLeft", "red");
 
-                            rightBlue = rbt.getColorValue("colorRight","blue");
-                            rightRed = rbt.getColorValue("colorRight","red");
+                            rightBlue = rbt.getColorValue("colorRight", "blue");
+                            rightRed = rbt.getColorValue("colorRight", "red");
 
-                            telemetry.addData("leftRed",leftRed);
-                            telemetry.addData("leftBlue",leftBlue);
-                            telemetry.addData("rightRed",rightRed);
-                            telemetry.addData("rightBlue",rightBlue);
+                            telemetry.addData("leftRed", leftRed);
+                            telemetry.addData("leftBlue", leftBlue);
+                            telemetry.addData("rightRed", rightRed);
+                            telemetry.addData("rightBlue", rightBlue);
                             telemetry.update();
 
-                            if ((leftRed!=null && leftRed >= 5) || (leftBlue!=null && leftBlue >= 5))
+                            if ((leftRed != null && leftRed >= 5) || (leftBlue != null && leftBlue >= 5))
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                            if ((rightRed!=null && rightRed >= 5) || (rightBlue!=null && rightBlue >= 5))
+                            if ((rightRed != null && rightRed >= 5) || (rightBlue != null && rightBlue >= 5))
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
                     } catch (NullPointerException e) {
@@ -185,43 +185,68 @@ public class MasterAutonomous extends LinearOpMode {
         );
         rbt.waitForFlag("ProcessLower");
 
-        if(!crater) {
+        Log.d("MasterAutonomous", "after flag: ProcessLower");
+
+        if (!crater) {
             //TODO:Extend Mineral System and place the Team Marker if on non-crater side
         }
 
-        //TODO:Fix the positioning of the minerals
         switch (rbt.blockLocation[0]) {
             case "right":
-                rbt.turn(-33,SAFESPEED);
+
+                rbt.turn(-33, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(23,SAFESPEED);
+                rbt.drive(25, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-7,SAFESPEED);
+                rbt.drive(-10, SAFESPEED);
+
+                if(crater) {
+                    //TODO IMPLEMENT STUFF FOR THE CRATER ON RIGHT BLOCK
+                    Log.d("MasterAutonomous","inside right,crater");
+                } else {
+                    Log.d("MasterAutonomous","inside right,!crater");
+                    rbt.turn(-53, -SAFESPEED);
+                    rbt.drive(6, SAFESPEED);
+                }
+
                 break;
+
             case "left":
-                rbt.turn(38,SAFESPEED);
+
+                rbt.turn(38, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(25,SAFESPEED);
+                rbt.drive(25, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-7,SAFESPEED);
+                rbt.drive(-12, SAFESPEED);
+
+                if(crater) {
+                    //TODO IMPLEMENT STUFF FOR THE CRATER ON LEFT BLOCK
+                    Log.d("MasterAutonomous","inside left,crater");
+                } else {
+                    Log.d("MasterAutonomous","inside left,!crater");
+                    rbt.turn(-120, SAFESPEED);
+                    rbt.drive(20, SAFESPEED);
+                }
+
                 break;
+
             //case "center" and error guess
             default:
-                rbt.turn(10,SAFESPEED);
+
                 rbt.pause(50);
-                rbt.drive(20,SAFESPEED);
+                rbt.drive(20, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-9,SAFESPEED);
+                rbt.drive(-9, SAFESPEED);
+
+                if(crater) {
+                    //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
+                } else {
+                    rbt.turn(-90, SAFESPEED);
+                    rbt.drive(15, SAFESPEED);
+                }
+
                 break;
         }
-
-        if(crater) {
-
-        } else {
-
-        }
-
-
 
 
     }

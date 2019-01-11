@@ -438,6 +438,7 @@ public class Robot<T extends RobotConfiguration> {
 
         Log.i(TAG, "owturn: Target counts: " + targetEncoderCounts);
 
+        //TODO TEST REMOVING THE FOLLOWING LINE OF CODE BECAUSE IT IS UNNECCESSARY AND POSSIBLY GIVING ERRORS
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         boolean targetReached = false;
@@ -483,9 +484,11 @@ public class Robot<T extends RobotConfiguration> {
     //SEASON SPECIFIC FUNCTIONS
 
     //TODO implement this method
-    static byte[][] out = new byte[3][];
+
 
     public void getCameraCapture() {
+
+        byte[][] out = new byte[3][];
 
         CountDownLatch cdl = new CountDownLatch(1);
         final int[] i = new int[1];
