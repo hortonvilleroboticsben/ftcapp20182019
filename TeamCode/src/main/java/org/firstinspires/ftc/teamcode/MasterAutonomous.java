@@ -148,7 +148,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setDrivePower(0.08, 0.08);
                     try {
-                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
+                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 || rbt.getPower("mtrRightDrive") == 0)) {
 
                             leftBlue = rbt.getColorValue("colorLeft", "blue");
                             leftRed = rbt.getColorValue("colorLeft", "red");
@@ -164,7 +164,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                             if ((leftRed != null && leftRed >= 5) || (leftBlue != null && leftBlue >= 5))
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                            if ((rightRed != null && rightRed >= 5) || (rightBlue != null && rightBlue >= 5))
+                            if ((rightRed != null && rightRed >= 6) || (rightBlue != null && rightBlue >= 6))
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
                     } catch (NullPointerException e) {
@@ -185,8 +185,6 @@ public class MasterAutonomous extends LinearOpMode {
         );
         rbt.waitForFlag("ProcessLower");
 
-        Log.d("MasterAutonomous", "after flag: ProcessLower");
-
         if (!crater) {
             //TODO:Extend Mineral System and place the Team Marker if on non-crater side
         }
@@ -194,7 +192,7 @@ public class MasterAutonomous extends LinearOpMode {
         switch (rbt.blockLocation[0]) {
             case "right":
 
-                rbt.turn(-33, SAFESPEED);
+                rbt.turn(-35, SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(25, SAFESPEED);
                 rbt.pause(50);
@@ -202,11 +200,10 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON RIGHT BLOCK
-                    Log.d("MasterAutonomous","inside right,crater");
                 } else {
-                    Log.d("MasterAutonomous","inside right,!crater");
                     rbt.turn(-53, -SAFESPEED);
-                    rbt.drive(6, SAFESPEED);
+                    rbt.drive(42, SAFESPEED);
+                    rbt.turn(-40,SAFESPEED);
                 }
 
                 break;
@@ -221,11 +218,12 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON LEFT BLOCK
-                    Log.d("MasterAutonomous","inside left,crater");
                 } else {
-                    Log.d("MasterAutonomous","inside left,!crater");
                     rbt.turn(-120, SAFESPEED);
-                    rbt.drive(20, SAFESPEED);
+                    rbt.drive(43, SAFESPEED);
+                    rbt.turn(-45,SAFESPEED);
+                    rbt.drive(15,SAFESPEED);
+                    rbt.owTurn(25, -SAFESPEED);
                 }
 
                 break;
@@ -236,13 +234,14 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.pause(50);
                 rbt.drive(20, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-9, SAFESPEED);
+                rbt.drive(-8, SAFESPEED);
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
                 } else {
                     rbt.turn(-90, SAFESPEED);
-                    rbt.drive(15, SAFESPEED);
+                    rbt.drive(50, SAFESPEED);
+                    rbt.turn(-38,SAFESPEED);
                 }
 
                 break;
