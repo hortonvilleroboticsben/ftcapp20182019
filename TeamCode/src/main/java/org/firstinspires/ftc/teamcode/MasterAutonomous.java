@@ -110,8 +110,8 @@ public class MasterAutonomous extends LinearOpMode {
         rbt.runParallel("ProcessLower",
                 () -> {
                     rbt.setPower("mtrLift", 0.72);
-                    sleep(1000);
-                    while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 50) > 50) ;
+                    sleep(2500);
+                    while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 20) > 50) ;
                     rbt.setServoPosition("srvLock", LOCKCLOSED);
                     rbt.runToTarget("mtrLift", -600, -.72, true);
                     while (!rbt.hasMotorEncoderReached("mtrLift", -590)) ;
@@ -148,7 +148,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rbt.setDrivePower(0.08, 0.08);
                     try {
-                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 || rbt.getPower("mtrRightDrive") == 0)) {
+                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
 
                             leftBlue = rbt.getColorValue("colorLeft", "blue");
                             leftRed = rbt.getColorValue("colorLeft", "red");
@@ -164,7 +164,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                             if ((leftRed != null && leftRed >= 5) || (leftBlue != null && leftBlue >= 5))
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                            if ((rightRed != null && rightRed >= 6) || (rightBlue != null && rightBlue >= 6))
+                            if ((rightRed != null && rightRed >= 6) || (rightBlue != null && rightBlue >= 5))
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
                     } catch (NullPointerException e) {
@@ -231,6 +231,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.turn(-45,SAFESPEED);
                     rbt.drive(15,SAFESPEED);
                     rbt.owTurn(25, -SAFESPEED);
+                    rbt.drive(3,SAFESPEED);
                 }
 
                 break;

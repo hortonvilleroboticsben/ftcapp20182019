@@ -301,7 +301,9 @@ public class Robot<T extends RobotConfiguration> {
         Timer timer = new Timer();
         double startVal = t.getSample();
         while(!timer.hasTimeElapsed(sampleTimeMS));
-        return (t.getSample() - startVal)/sampleTimeMS*1000.;
+        double currentVelocity = (t.getSample() - startVal)/sampleTimeMS*1000.;
+        Log.d(TAG,"calculateVelocity: current velocity: " + currentVelocity);
+        return currentVelocity;
     }
 
     public void setServoPosition(@NonNull String servoName, double position) {
@@ -538,27 +540,32 @@ public class Robot<T extends RobotConfiguration> {
             GrayF32 subImage = blueLayer.subimage(0, height, width, blueLayer.height);
 
             GrayU8 thresh = new GrayU8(width, height),
+                    blue = new GrayU8(width, height),
+                    red = new GrayU8(width, height),
                     dilated = new GrayU8(width, height),
                     eroded = new GrayU8(width, height);
 
-            float threshold = 190;
-            ThresholdImageOps.threshold(subImage, thresh, threshold, false);
-            BinaryImageOps.erode8(thresh, 2, eroded);
-            BinaryImageOps.dilate8(eroded, 2, dilated);
+            float thresholdB = 175, thresholdR = 175;
+            ThresholdImageOps.threshold(subImage, blue, thresholdB, false);
+            ThresholdImageOps.threshold(subImage, red, thresholdR, false);
+            BinaryImageOps.logicAnd(blue, red, thresh);
+            BinaryImageOps.erode8(thresh, 3, eroded);
+            BinaryImageOps.dilate8(eroded, 3, dilated);
 
-            GrayU8 g = dilated.clone();
+            final GrayU8 g = dilated.clone();
 
-            for (int x = 0; x < g.width; x++) {
-                for (int y = 0; y < g.height; y++) {
-                    if (g.get(x, y) > 0) g.set(x, y, 100);
+            (new Thread(() -> {
+                for (int x = 0; x < g.width; x++) {
+                    for (int y = 0; y < g.height; y++) {
+                        if (g.get(x, y) > 0) g.set(x, y, 100);
+                    }
                 }
-            }
 
-            Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
-            ByteArrayOutputStream outS = new ByteArrayOutputStream();
-            b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
-            FileUtils.writeToFile("/out.jpg", outS.toByteArray());
-
+                Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
+                ByteArrayOutputStream outS = new ByteArrayOutputStream();
+                b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
+                FileUtils.writeToFile("/out.jpg", outS.toByteArray());
+            })).start();
 
             List<Contour> contours =
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
