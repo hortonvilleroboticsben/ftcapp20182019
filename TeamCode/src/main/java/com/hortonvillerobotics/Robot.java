@@ -535,9 +535,12 @@ public class Robot<T extends RobotConfiguration> {
             Planar<GrayF32> layers = ConvertBitmap.bitmapToPlanar(bitmap, null, GrayF32.class, null);
 
             GrayF32 blueLayer = layers.getBand(2);
+            GrayF32 redLayer = layers.getBand(0);
 //            int width = 2 * (blueLayer.width / 5), height = blueLayer.height;
             int width = blueLayer.width, height = blueLayer.height / 2;
-            GrayF32 subImage = blueLayer.subimage(0, height, width, blueLayer.height);
+
+            GrayF32 subImageRed = redLayer.subimage(0, height, width, redLayer.height);
+            GrayF32 subImageBlue = blueLayer.subimage(0, height, width, blueLayer.height);
 
             GrayU8 thresh = new GrayU8(width, height),
                     blue = new GrayU8(width, height),
@@ -546,11 +549,13 @@ public class Robot<T extends RobotConfiguration> {
                     eroded = new GrayU8(width, height);
 
             float thresholdB = 175, thresholdR = 175;
-            ThresholdImageOps.threshold(subImage, blue, thresholdB, false);
-            ThresholdImageOps.threshold(subImage, red, thresholdR, false);
+            ThresholdImageOps.threshold(subImageBlue, blue, thresholdB, false);
+            ThresholdImageOps.threshold(subImageRed, red, thresholdR, false);
             BinaryImageOps.logicAnd(blue, red, thresh);
             BinaryImageOps.erode8(thresh, 3, eroded);
             BinaryImageOps.dilate8(eroded, 3, dilated);
+
+
 
             final GrayU8 g = dilated.clone();
 
