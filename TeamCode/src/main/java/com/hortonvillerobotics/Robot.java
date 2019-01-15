@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -23,10 +22,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -228,19 +224,19 @@ public class Robot<T extends RobotConfiguration> {
         }
     }
 
-    public void runToTarget(@NonNull String motorName, int target, double power) {
+    public void initRunToTarget(@NonNull String motorName, int target, double power) {
         if (motors.get(motorName) != null) {
             setTarget(motorName, target);
             setPower(motorName, power);
         } else {
-            Log.e(TAG, "runToTarget: failed to run motor: " + motorName + " to target: " + target + " at power: " + power);
+            Log.e(TAG, "initRunToTarget: failed to run motor: " + motorName + " to target: " + target + " at power: " + power);
         }
     }
 
-    public void runToTarget(@NonNull String motorName, int target, double power, boolean reset) {
+    public void initRunToTarget(@NonNull String motorName, int target, double power, boolean reset) {
         if (motors.get(motorName) != null) {
             if (reset) resetEncoder(motorName);
-            runToTarget(motorName, target, power);
+            initRunToTarget(motorName, target, power);
         }
     }
 
@@ -281,12 +277,12 @@ public class Robot<T extends RobotConfiguration> {
         setRunMode("mtrRightDrive", rm);
     }
 
-    public void runDriveToTarget(int lTarget, double lPow, int rTarget, double rPow) {
-        runToTarget("mtrLeftDrive", lTarget, lPow);
-        runToTarget("mtrRightDrive", rTarget, rPow);
+    public void initRunDriveToTarget(int lTarget, double lPow, int rTarget, double rPow) {
+        initRunToTarget("mtrLeftDrive", lTarget, lPow);
+        initRunToTarget("mtrRightDrive", rTarget, rPow);
     }
 
-    public void runDriveToTarget(int lTarget, double lPow, int rTarget, double rPow, boolean reset) {
+    public void initRunDriveToTarget(int lTarget, double lPow, int rTarget, double rPow, boolean reset) {
         if (reset) resetDriveEncoders();
         setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
         setDriveEncoderTarget(lTarget, rTarget);
@@ -348,7 +344,7 @@ public class Robot<T extends RobotConfiguration> {
         int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation());
         Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
 
-        runDriveToTarget(-targetEncoderCounts, power, -targetEncoderCounts, power, true);
+        initRunDriveToTarget(-targetEncoderCounts, power, -targetEncoderCounts, power, true);
 
         while (opModeIsActive()) {
 
@@ -397,11 +393,11 @@ public class Robot<T extends RobotConfiguration> {
 
         if (degrees > 0) {
 
-            runDriveToTarget(targetEncoderCounts, power, -targetEncoderCounts, power, true);
+            initRunDriveToTarget(targetEncoderCounts, power, -targetEncoderCounts, power, true);
 
         } else {
 
-            runDriveToTarget(-targetEncoderCounts, power, targetEncoderCounts, power, true);
+            initRunDriveToTarget(-targetEncoderCounts, power, targetEncoderCounts, power, true);
 
         }
 
@@ -451,7 +447,7 @@ public class Robot<T extends RobotConfiguration> {
                 Log.i(TAG, "owturn: power less than 0");
             }
 
-            runDriveToTarget(0, 0, targetEncoderCounts, power, true);
+            initRunDriveToTarget(0, 0, targetEncoderCounts, power, true);
 
             while (opModeIsActive() && Math.abs(getEncoderCounts("mtrRightDrive")) < Math.abs(targetEncoderCounts) - 20) {
                 Log.d(TAG, "owturn: current right count: " + getEncoderCounts("mtrRightDrive"));
@@ -465,7 +461,7 @@ public class Robot<T extends RobotConfiguration> {
                 Log.i(TAG, "owturn: power less than 0");
             }
 
-            runDriveToTarget(targetEncoderCounts, power, 0, 0, true);
+            initRunDriveToTarget(targetEncoderCounts, power, 0, 0, true);
 
             while (opModeIsActive() && Math.abs(getEncoderCounts("mtrLeftDrive")) < Math.abs(targetEncoderCounts) - 20) {
                 Log.d(TAG, "owturn: current left count: " + getEncoderCounts("mtrLeftDrive"));
@@ -622,36 +618,11 @@ public class Robot<T extends RobotConfiguration> {
 
     }
 
-    public void lift(double distance, double power) {
-        DcMotor mtrLift = motors.get("mtrLift");
-        double wheelRotations = distance / config.getWheelCircumference();
-        int targetEncoderCounts = (int) (wheelRotations * config.getCountsPerRotation());
-        Log.i(TAG, "drive: Target counts: " + targetEncoderCounts);
-
-        runDriveToTarget(targetEncoderCounts, power, targetEncoderCounts, power, true);
-
-        while (opModeIsActive()) {
-
-            Log.d(TAG, "turn: current lift count: " + mtrLift.getCurrentPosition());
-
-            if (Math.abs(getEncoderCounts("mtrLift")) >= Math.abs(targetEncoderCounts) - 20) {
-                setPower("mtrLift", 0);
-            } else {
-                setPower("mtrLift", power);
-            }
-
-            if (Math.abs(getEncoderCounts("mtrRightDrive")) >= Math.abs(targetEncoderCounts) - 20) {
-                setPower("mtrRightDrive", 0);
-            } else {
-                setPower("mtrRightDrive", power);
-            }
-
-            if (getPower("mtrLeftDrive") == 0 && getPower("mtrRightDrive") == 0) break;
-        }
-
-        Log.v(TAG, "drive: Successfully drove to target of " + distance + " inches");
-
+    public void runToTarget(@NonNull String mtr, int encoder, double speed){
+        initRunToTarget(mtr,encoder,speed,true);
+        while(!hasMotorEncoderReached(mtr, encoder));
+        setRunMode(mtr, DcMotor.RunMode.RUN_USING_ENCODER);
+        setPower(mtr, 0);
     }
-
 
 }
