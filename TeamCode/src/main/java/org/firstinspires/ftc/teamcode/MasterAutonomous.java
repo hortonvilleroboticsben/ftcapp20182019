@@ -1,22 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.hardware.Camera;
-import android.os.Looper;
-import android.util.Log;
-
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
 import com.hortonvillerobotics.StateMachine;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
-import org.firstinspires.ftc.robotcontroller.internal.ActivityHolder;
-import org.firstinspires.ftc.robotcontroller.internal.CameraPreview;
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-
-import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cameraView;
-import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.cp;
 
 @Autonomous(name = "Autonomous", group = "competition")
 public class MasterAutonomous extends LinearOpMode {
@@ -113,12 +102,8 @@ public class MasterAutonomous extends LinearOpMode {
                     sleep(2500);
                     while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 20) > 50) ;
                     rbt.setServoPosition("srvLock", LOCKCLOSED);
-                    rbt.runToTarget("mtrLift", -600, -.72, true);
-                    while (!rbt.hasMotorEncoderReached("mtrLift", -590)) ;
-                    rbt.setRunMode("mtrLift", DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setPower("mtrLift", 0);
-
-//                    rbt.runDriveToTarget(2000,.5,2000,.5);
+                    rbt.runToTarget("mtrLift", -600, -.72);
+//                    rbt.initRunDriveToTarget(2000,.5,2000,.5);
 //                    while(!rbt.hasMotorEncoderReached("mtrLeftDrive", 1990));
 //                    rbt.setDrivePower(0,0);
 
@@ -187,6 +172,11 @@ public class MasterAutonomous extends LinearOpMode {
 
         if (!crater) {
             //TODO:Extend Mineral System and place the Team Marker if on non-crater side
+//            rbt.runToTarget("mtrCollection", 1000,0.72);
+//            rbt.setServoPower("srvColR", -1);
+//            rbt.setServoPower("srvColL", 1);
+//            sleep(250);
+//            rbt.initRunToTarget("mtrCollection", 0, 0.5);
         }
 
         switch (rbt.blockLocation[0]) {
