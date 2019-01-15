@@ -61,7 +61,7 @@ public class DemoTeleOp extends LinearOpMode {
                         s.incrementState();
                     }
                 }, () -> {
-                    r.runToTarget("mtrArm", 97, -.12);
+                    r.initRunToTarget("mtrArm", 97, -.12);
                     if (r.hasMotorEncoderReached("mtrArm", 97)) {
                         r.setPower("mtrArm", 0);
                         r.setRunMode("mtrArm", DcMotor.RunMode.RUN_USING_ENCODER);
