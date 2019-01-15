@@ -14,6 +14,9 @@ public class FinalRobotConfiguration extends RobotConfiguration {
             {"mtrLeftDrive", "forward"},
             {"mtrRightDrive", "reverse"},
             {"mtrLift", "reverse"},
+            {"mtrCollection", "forward"},
+            {"mtrDeposition", "forward"},
+            {"mtrConveyor", "forward"}
     };
     private static String[][] servos = {
             {"srvLock"},
