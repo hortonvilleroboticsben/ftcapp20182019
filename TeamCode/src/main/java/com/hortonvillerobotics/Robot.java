@@ -40,7 +40,6 @@ import boofcv.struct.image.Planar;
 import georegression.struct.point.Point2D_I32;
 
 public class Robot<T extends RobotConfiguration> {
-    //this comment line is just so I can push
 
     public static String TAG = "ROBOTCLASS";
 
@@ -532,7 +531,6 @@ public class Robot<T extends RobotConfiguration> {
 
             GrayF32 blueLayer = layers.getBand(2);
             GrayF32 redLayer = layers.getBand(0);
-//            int width = 2 * (blueLayer.width / 5), height = blueLayer.height;
             int width = blueLayer.width, height = blueLayer.height / 2;
 
             GrayF32 subImageRed = redLayer.subimage(0, height, width, redLayer.height);
@@ -576,28 +574,26 @@ public class Robot<T extends RobotConfiguration> {
             Point2D_I32 p1 = null;
             FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
-                int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
-                if (c.external.size() == 0) continue;
-                for (Point2D_I32 p : c.external) {
-                    if (p.x > maxX) maxX = p.x;
-                    if (p.x < minX) minX = p.x;
-                    if (p.y > maxY) maxY = p.y;
-                    if (p.y < minY) minY = p.y;
-                }
-                int w = maxX - minX;
-                int h = maxY - minY;
-                int size = w * h;
 
-                FileUtils.appendToFile("/sizes.txt", size+"\r\n");
+                if(c.external.size()==0) continue;
+                int size = 0, lastX = c.external.get(0).x , lastY = c.external.get(0).y;
+                Point2D_I32 p;
+
+                for(int index = 1; index < c.external.size(); index++) {
+                    p = c.external.get(index);
+                    size += Math.abs(p.x - lastX) * Math.abs(p.y - lastY);
+                    lastX = p.x;
+                    lastY = p.y;
+                }
 
                 if (size > requiredSize) {
 
                     Log.d("SIZE", size + "");
 
                     int avg_x = 0, avg_y = 0;
-                    for (Point2D_I32 p : c.external) {
-                        avg_x += p.x;
-                        avg_y += p.y;
+                    for (Point2D_I32 point : c.external) {
+                        avg_x += point.x;
+                        avg_y += point.y;
                     }
                     avg_x /= c.external.size();
                     avg_y /= c.external.size();
