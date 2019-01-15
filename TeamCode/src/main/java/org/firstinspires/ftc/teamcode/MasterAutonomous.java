@@ -13,11 +13,11 @@ public class MasterAutonomous extends LinearOpMode {
     private final double LOCKCLOSED = 0.117;
     private final double LOCKOPEN = 0.55; //.536
 
-    private final double SAFESPEED = .23;
+    private final double SAFESPEED = .3;
 
     private Integer leftRed, leftBlue, rightRed, rightBlue;
 
-    private boolean crater = false;
+    private boolean crater = true;
     //    String blockPos = "";
     private StateMachine s = new StateMachine();
     private long startPause = 0;
@@ -184,12 +184,19 @@ public class MasterAutonomous extends LinearOpMode {
 
                 rbt.turn(-35, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(25, SAFESPEED);
+                rbt.drive(23.5, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-10, SAFESPEED);
+                rbt.drive(-8, SAFESPEED);
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON RIGHT BLOCK
+                    //
+                    rbt.turn(110,SAFESPEED);
+                    rbt.drive(60,SAFESPEED);
+                    rbt.drive(10,SAFESPEED);
+                    //place marker in this spot
+                    rbt.drive(-20,SAFESPEED);
+                    rbt.turn(180,SAFESPEED);
                 } else {
                     rbt.turn(-53, -SAFESPEED);
                     rbt.drive(42, SAFESPEED);
@@ -219,9 +226,8 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.turn(-120, SAFESPEED);
                     rbt.drive(43, SAFESPEED);
                     rbt.turn(-45,SAFESPEED);
-                    rbt.drive(15,SAFESPEED);
+                    rbt.drive(18,SAFESPEED);
                     rbt.owTurn(25, -SAFESPEED);
-                    rbt.drive(3,SAFESPEED);
                 }
 
                 break;
@@ -236,7 +242,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
-                    rbt.turn(45,SAFESPEED);
+                    rbt.turn(90,SAFESPEED);
                     rbt.drive(45,SAFESPEED);
                     rbt.turn(45,SAFESPEED);
                     rbt.drive(15,SAFESPEED);
