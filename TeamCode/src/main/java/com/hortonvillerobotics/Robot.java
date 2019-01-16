@@ -71,7 +71,7 @@ public class Robot<T extends RobotConfiguration> {
         void executeTasks();
     }
 
-    public interface VelocityTask{
+    public interface VelocityTask {
         double getSample();
     }
 
@@ -138,9 +138,9 @@ public class Robot<T extends RobotConfiguration> {
                     HardwareDevice sensor = opMode.hardwareMap.get(sensorName);
                     sensor.resetDeviceConfigurationForOpMode();
 
-                    if(sensor instanceof ColorSensor) {
+                    if (sensor instanceof ColorSensor) {
                         Log.e("ROBOT", "SENSOR IS RIGHT TYPE");
-                        ((ColorSensor) sensor).setI2cAddress(I2cAddr.create8bit(Integer.parseInt(sensorData[1],16)));
+                        ((ColorSensor) sensor).setI2cAddress(I2cAddr.create8bit(Integer.parseInt(sensorData[1], 16)));
                         ((ColorSensor) sensor).enableLed(true);
                     }
 
@@ -240,9 +240,9 @@ public class Robot<T extends RobotConfiguration> {
     }
 
     @Nullable
-    public Integer getColorValue(String sensor, String channel){
-        if(sensors.get(sensor) != null && sensors.get(sensor) instanceof ColorSensor){
-            switch(channel){
+    public Integer getColorValue(String sensor, String channel) {
+        if (sensors.get(sensor) != null && sensors.get(sensor) instanceof ColorSensor) {
+            switch (channel) {
                 case "red":
                     return ((ColorSensor) sensors.get(sensor)).red();
                 case "blue":
@@ -292,12 +292,12 @@ public class Robot<T extends RobotConfiguration> {
         return opMode instanceof LinearOpMode && ((LinearOpMode) opMode).opModeIsActive();
     }
 
-    public double calculateVelocity(VelocityTask t, long sampleTimeMS){
+    public double calculateVelocity(VelocityTask t, long sampleTimeMS) {
         Timer timer = new Timer();
         double startVal = t.getSample();
-        while(!timer.hasTimeElapsed(sampleTimeMS));
-        double currentVelocity = (t.getSample() - startVal)/sampleTimeMS*1000.;
-        Log.d(TAG,"calculateVelocity: current velocity: " + currentVelocity);
+        while (!timer.hasTimeElapsed(sampleTimeMS)) ;
+        double currentVelocity = (t.getSample() - startVal) / sampleTimeMS * 1000.;
+        Log.d(TAG, "calculateVelocity: current velocity: " + currentVelocity);
         return currentVelocity;
     }
 
@@ -550,20 +550,19 @@ public class Robot<T extends RobotConfiguration> {
             BinaryImageOps.dilate8(eroded, 3, dilated);
 
 
-
             final GrayU8 g = dilated.clone();
 
             //(new Thread(() -> {
-                for (int x = 0; x < g.width; x++) {
-                    for (int y = 0; y < g.height; y++) {
-                        if (g.get(x, y) > 0) g.set(x, y, 100);
-                    }
+            for (int x = 0; x < g.width; x++) {
+                for (int y = 0; y < g.height; y++) {
+                    if (g.get(x, y) > 0) g.set(x, y, 100);
                 }
+            }
 
-                Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
-                ByteArrayOutputStream outS = new ByteArrayOutputStream();
-                b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
-                FileUtils.writeToFile("/out.jpg", outS.toByteArray());
+            Bitmap b = ConvertBitmap.grayToBitmap(g, Bitmap.Config.ARGB_8888);
+            ByteArrayOutputStream outS = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
+            FileUtils.writeToFile("/out.jpg", outS.toByteArray());
             //})).start();
 
             List<Contour> contours =
@@ -572,21 +571,28 @@ public class Robot<T extends RobotConfiguration> {
 
             int requiredSize = 7250, numLarger = 0;
             Point2D_I32 p1 = null;
-            FileUtils.writeToFile("/sizes.txt","");
+//            FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
 
-                if(c.external.size()==0) continue;
-                int size = 0, lastX = c.external.get(0).x , lastY = c.external.get(0).y;
+                if (c.external.size() == 0) continue;
+
+                int size = 0, lastX = c.external.get(0).x, midY = 0;
                 Point2D_I32 p;
 
-                for(int index = 1; index < c.external.size(); index++) {
-                    p = c.external.get(index);
-                    size += Math.abs(p.x - lastX) * Math.abs(p.y - lastY);
-                    lastX = p.x;
-                    lastY = p.y;
+                int avg = 0;
+                for (Point2D_I32 point : c.external) {
+                    avg += point.y;
                 }
-                    Log.d(TAG,"Contour size: " + size);
-                  if (size > requiredSize) {
+                midY = avg / c.external.size();
+
+                for (int index = 1; index < c.external.size(); index++) {
+                    p = c.external.get(index);
+                    size += Math.abs(p.x - lastX) * Math.abs(p.y - midY);
+                    lastX = p.x;
+                }
+
+                Log.d(TAG, "Contour size: " + size);
+                if (size > requiredSize) {
 
                     Log.d(TAG, "Successful contour size: " + size);
 
@@ -614,9 +620,9 @@ public class Robot<T extends RobotConfiguration> {
 
     }
 
-    public void runToTarget(@NonNull String mtr, int encoder, double speed){
-        initRunToTarget(mtr,encoder,speed,true);
-        while(!hasMotorEncoderReached(mtr, encoder));
+    public void runToTarget(@NonNull String mtr, int encoder, double speed) {
+        initRunToTarget(mtr, encoder, speed, true);
+        while (!hasMotorEncoderReached(mtr, encoder)) ;
         setRunMode(mtr, DcMotor.RunMode.RUN_USING_ENCODER);
         setPower(mtr, 0);
     }
