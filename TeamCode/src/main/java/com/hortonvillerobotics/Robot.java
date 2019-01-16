@@ -23,6 +23,8 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -522,6 +524,11 @@ public class Robot<T extends RobotConfiguration> {
 
     }
 
+    Comparator<Point2D_I32> point2D_i32Comparator = (point1, point2) -> {
+        int difference = point1.x - point2.x;
+        return Integer.compare(difference, 0);
+    };
+
     public void analyzePhotoData() {
 
         for (Bitmap bitmap : cameraSnapshots) {
@@ -570,11 +577,13 @@ public class Robot<T extends RobotConfiguration> {
 
 
             int requiredSize = 7250, numLarger = 0;
-            Point2D_I32 p1 = null;
+            Point2D_I32 foundPoint = null;
 //            FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
 
                 if (c.external.size() == 0) continue;
+
+                Collections.sort(c.external, point2D_i32Comparator);
 
                 int size = 0, lastX = c.external.get(0).x, midY = 0;
                 Point2D_I32 p;
@@ -605,7 +614,7 @@ public class Robot<T extends RobotConfiguration> {
                     avg_y /= c.external.size();
 
                     if (numLarger == 0) {
-                        p1 = new Point2D_I32(avg_x, avg_y);
+                        foundPoint = new Point2D_I32(avg_x, avg_y);
                         numLarger++;
                     } else if (numLarger == 1) {
                         numLarger++;
@@ -614,7 +623,7 @@ public class Robot<T extends RobotConfiguration> {
                 }
             }
 
-            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (p1.x > width / 2) ? "left" : "center" : "error";
+            blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (foundPoint.x > width / 2) ? "left" : "center" : "error";
             bitmap = null;
         }
 
