@@ -98,6 +98,7 @@ public class MasterAutonomous extends LinearOpMode {
 
         rbt.runParallel("ProcessLower",
                 () -> {
+
                     rbt.setPower("mtrLift", 0.72);
                     sleep(2500);
                     while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 20) > 50) ;

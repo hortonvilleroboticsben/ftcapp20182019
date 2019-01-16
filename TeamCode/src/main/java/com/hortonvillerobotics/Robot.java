@@ -436,7 +436,7 @@ public class Robot<T extends RobotConfiguration> {
         Log.i(TAG, "owturn: Target counts: " + targetEncoderCounts);
 
         //TODO TEST REMOVING THE FOLLOWING LINE OF CODE BECAUSE IT IS UNNECCESSARY AND POSSIBLY GIVING ERRORS
-        setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        setDriveRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         boolean targetReached = false;
 
@@ -553,7 +553,7 @@ public class Robot<T extends RobotConfiguration> {
 
             final GrayU8 g = dilated.clone();
 
-            (new Thread(() -> {
+            //(new Thread(() -> {
                 for (int x = 0; x < g.width; x++) {
                     for (int y = 0; y < g.height; y++) {
                         if (g.get(x, y) > 0) g.set(x, y, 100);
@@ -564,7 +564,7 @@ public class Robot<T extends RobotConfiguration> {
                 ByteArrayOutputStream outS = new ByteArrayOutputStream();
                 b.compress(Bitmap.CompressFormat.JPEG, 100, outS);
                 FileUtils.writeToFile("/out.jpg", outS.toByteArray());
-            })).start();
+            //})).start();
 
             List<Contour> contours =
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
@@ -585,10 +585,10 @@ public class Robot<T extends RobotConfiguration> {
                     lastX = p.x;
                     lastY = p.y;
                 }
+                    Log.d(TAG,"Contour size: " + size);
+                  if (size > requiredSize) {
 
-                if (size > requiredSize) {
-
-                    Log.d("SIZE", size + "");
+                    Log.d(TAG, "Successful contour size: " + size);
 
                     int avg_x = 0, avg_y = 0;
                     for (Point2D_I32 point : c.external) {
