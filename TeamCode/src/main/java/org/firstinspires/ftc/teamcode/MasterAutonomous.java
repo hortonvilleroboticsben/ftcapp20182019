@@ -187,14 +187,13 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.pause(50);
                 rbt.drive(23.5, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(-8, SAFESPEED);
+                rbt.drive(-9, SAFESPEED);
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON RIGHT BLOCK
                     //
-                    rbt.turn(110,SAFESPEED);
-                    rbt.drive(60,SAFESPEED);
-                    rbt.drive(10,SAFESPEED);
+                    rbt.turn(123,SAFESPEED);
+                    rbt.drive(55,SAFESPEED);
                     //place marker in this spot
                     rbt.drive(-20,SAFESPEED);
                     rbt.turn(180,SAFESPEED);
@@ -245,11 +244,11 @@ public class MasterAutonomous extends LinearOpMode {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
                     rbt.turn(90,SAFESPEED);
                     rbt.drive(45,SAFESPEED);
-                    rbt.turn(45,SAFESPEED);
+                    rbt.turn(38,SAFESPEED);
                     rbt.drive(15,SAFESPEED);
                     //place marker in this spot
                     rbt.drive(-30,SAFESPEED);
-                    rbt.turn(180,SAFESPEED);
+                    rbt.turn(175,SAFESPEED);
                 } else {
                     rbt.turn(-90, SAFESPEED);
                     rbt.drive(50, SAFESPEED);

@@ -531,6 +531,8 @@ public class Robot<T extends RobotConfiguration> {
 
     public void analyzePhotoData() {
 
+        long startTime = System.currentTimeMillis();
+
         for (Bitmap bitmap : cameraSnapshots) {
             if (!opModeIsActive()) break;
             if (bitmap == null) continue;
@@ -626,6 +628,10 @@ public class Robot<T extends RobotConfiguration> {
             blockLocation[0] = (numLarger == 2) ? "right" : (numLarger == 1) ? (foundPoint.x > width / 2) ? "left" : "center" : "error";
             bitmap = null;
         }
+
+        long endTime = System.currentTimeMillis();
+
+        Log.d("Time AnalyzePhoto Took:", " "+(endTime-startTime));
 
     }
 
