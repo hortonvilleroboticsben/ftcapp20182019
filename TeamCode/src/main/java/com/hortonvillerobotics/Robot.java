@@ -578,39 +578,33 @@ public class Robot<T extends RobotConfiguration> {
                     BinaryImageOps.contour(dilated, ConnectRule.EIGHT, null);
 
 
+
             int requiredSize = 7250, numLarger = 0;
             Point2D_I32 foundPoint = null;
 //            FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
-
+                int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
                 if (c.external.size() == 0) continue;
-
-                Collections.sort(c.external, point2D_i32Comparator);
-
-                int size = 0, lastX = c.external.get(0).x, midY = 0;
-                Point2D_I32 p;
-
-                int avg = 0;
-                for (Point2D_I32 point : c.external) {
-                    avg += point.y;
+                for (Point2D_I32 p : c.external) {
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.x < minX) minX = p.x;
+                    if (p.y > maxY) maxY = p.y;
+                    if (p.y < minY) minY = p.y;
                 }
-                midY = avg / c.external.size();
+                int w = maxX - minX;
+                int h = maxY - minY;
+                int size = w * h;
 
-                for (int index = 1; index < c.external.size(); index++) {
-                    p = c.external.get(index);
-                    size += Math.abs(p.x - lastX) * Math.abs(p.y - midY);
-                    lastX = p.x;
-                }
+//                FileUtils.appendToFile("/sizes.txt", size + "\r\n");
 
-                Log.d(TAG, "Contour size: " + size);
                 if (size > requiredSize) {
 
-                    Log.d(TAG, "Successful contour size: " + size);
+                    Log.d("SIZE", size + "");
 
                     int avg_x = 0, avg_y = 0;
-                    for (Point2D_I32 point : c.external) {
-                        avg_x += point.x;
-                        avg_y += point.y;
+                    for (Point2D_I32 p : c.external) {
+                        avg_x += p.x;
+                        avg_y += p.y;
                     }
                     avg_x /= c.external.size();
                     avg_y /= c.external.size();
