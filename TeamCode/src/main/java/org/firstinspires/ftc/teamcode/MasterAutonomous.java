@@ -18,7 +18,7 @@ public class MasterAutonomous extends LinearOpMode {
 
     private Integer leftRed, leftBlue, rightRed, rightBlue;
 
-    private boolean crater = true;
+    private boolean crater = false;
     //    String blockPos = "";
     private StateMachine s = new StateMachine();
     private long startPause = 0;
@@ -190,12 +190,10 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     rbt.drive(25.5, SAFESPEED);
-                    rbt.pause(50);
-                    rbt.drive(-10, SAFESPEED);
-                    rbt.turn(70,SAFESPEED);
-                    rbt.drive(10,0.1);
+//                    rbt.drive(-10, SAFESPEED);
+                    rbt.drive(5,SAFESPEED);
 
-                    //for dropping team marker
+                    // below & line 193 for dropping team marker
 //                    rbt.pause(50);
 //                    rbt.turn(122.5,SAFESPEED);
 //                    rbt.drive(55,SAFESPEED);
@@ -214,6 +212,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.drive(40, SAFESPEED);
                     rbt.turn(-35,SAFESPEED);
                     rbt.drive(11,SAFESPEED);
+
                 }
 
                 break;
@@ -223,16 +222,12 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.turn(38, SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(25, SAFESPEED);
-                rbt.pause(50);
-                rbt.drive(-12, SAFESPEED);
 
                 if(crater) {
 
+                    rbt.drive(6,0.1);
 
-                    rbt.turn(-70,SAFESPEED);
-                    rbt.drive(10,0.1);
-
-                    //for placing team marker
+                    // need a reverse (-12?) then this is code for placing team marker
 //                    rbt.turn(45,SAFESPEED);
 //                    rbt.drive(33,SAFESPEED);
 //                    rbt.turn(45,SAFESPEED);
@@ -242,11 +237,13 @@ public class MasterAutonomous extends LinearOpMode {
 //                    rbt.turn(180,SAFESPEED);
 //                    rbt.drive(8,SAFESPEED);
                 } else {
+                    rbt.drive(-12, SAFESPEED);
                     rbt.turn(-120, SAFESPEED);
                     rbt.drive(43, SAFESPEED);
                     rbt.turn(-45,SAFESPEED);
                     rbt.drive(20,SAFESPEED);
                     rbt.owTurn(17,-SAFESPEED);
+
                 }
 
                 break;
@@ -256,12 +253,11 @@ public class MasterAutonomous extends LinearOpMode {
 
                 rbt.pause(50);
                 rbt.drive(20, SAFESPEED);
-                rbt.pause(50);
-                rbt.drive(-8, SAFESPEED);
 
                 if(crater) {
 
-                    rbt.drive(5,0.1);
+                    //need a a reverse motion then this is code for placing team marker
+                    rbt.owTurn(45,-0.07);
 
 //                    rbt.turn(85.5,SAFESPEED);
 //                    rbt.drive(45,SAFESPEED);
@@ -271,11 +267,11 @@ public class MasterAutonomous extends LinearOpMode {
 //                    rbt.turn(180 ,SAFESPEED);
 //                    rbt.drive(15,SAFESPEED);
                 } else {
+                    rbt.drive(-8, SAFESPEED);
                     rbt.turn(-85, SAFESPEED);
                     rbt.drive(50, SAFESPEED);
                     rbt.turn(-40,SAFESPEED);
-                    rbt.drive(8,SAFESPEED);
-//                    rbt.turn();
+                    rbt.drive(2,SAFESPEED);
                 }
 
                 break;

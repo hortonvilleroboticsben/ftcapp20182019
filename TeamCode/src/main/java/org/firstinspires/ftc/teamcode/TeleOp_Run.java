@@ -44,12 +44,6 @@ public class TeleOp_Run extends LinearOpMode {
         encVol = telemetry.addData("LiftVelocity", r.calculateVelocity(() -> r.getEncoderCounts("mtrLift"), 50));
         encVol.setRetained(true);
 
-        r.runParallel("", ()->{
-            while(opModeIsActive()) {
-                encVol.setValue(r.calculateVelocity(() -> r.getEncoderCounts("mtrLift"), 50));
-            }
-        });
-
         while(opModeIsActive()){
 
             //CONTROLLER 1
@@ -70,8 +64,8 @@ public class TeleOp_Run extends LinearOpMode {
 
             drivePowerScale = gamepad1.left_trigger >= 0.5 ? 0.25 : gamepad1.left_bumper ? 0.5 : 1;
 
-            r.setDrivePower(Math.abs(gamepad1.left_stick_y) < 0.05 && !gamepad1.left_stick_button ? drivePowerScale * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) < 0.05 && !gamepad1.right_stick_button ? drivePowerScale * gamepad1.right_stick_y : 0);
-            r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
+            r.setDrivePower(Math.abs(gamepad1.left_stick_y) > 0.05 && !gamepad1.left_stick_button ? drivePowerScale * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) > 0.05 && !gamepad1.right_stick_button ? drivePowerScale * gamepad1.right_stick_y : 0);
+//            r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
 
             /*
             Lock Controls
