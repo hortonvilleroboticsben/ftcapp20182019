@@ -129,11 +129,11 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.pause(50);
 
                     //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
-                    rbt.drive(6, SAFESPEED);
+                    rbt.drive(4, SAFESPEED);
                     rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setDrivePower(0.07, 0.07);
+                    rbt.setDrivePower(0.1, 0.1);//0.07
                     Timer t1 = new Timer();
                     try {
                         while (opModeIsActive() && !t1.hasTimeElapsed(2000) && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
@@ -192,24 +192,28 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.drive(25.5, SAFESPEED);
                     rbt.pause(50);
                     rbt.drive(-10, SAFESPEED);
+                    rbt.turn(70,SAFESPEED);
+                    rbt.drive(10,0.1);
 
-                    rbt.pause(50);
-                    rbt.turn(122.5,SAFESPEED);
-                    rbt.drive(55,SAFESPEED);
-                    rbt.turn(40,SAFESPEED);
-                    rbt.pause(50);
-                    //place marker in this spot
-                    rbt.drive(-13,SAFESPEED);
-                    rbt.turn(188,SAFESPEED);
-                    rbt.drive(11,SAFESPEED);
+                    //for dropping team marker
+//                    rbt.pause(50);
+//                    rbt.turn(122.5,SAFESPEED);
+//                    rbt.drive(55,SAFESPEED);
+//                    rbt.turn(40,SAFESPEED);
+//                    rbt.pause(50);
+//                    //place marker in this spot
+//                    rbt.drive(-13,SAFESPEED);
+//                    rbt.turn(188,SAFESPEED);
+//                    rbt.drive(11,SAFESPEED);
                 } else {
                     rbt.drive(23.5, SAFESPEED);
                     rbt.pause(50);
                     rbt.drive(-9, SAFESPEED);
 
-                    rbt.turn(-53, -SAFESPEED);
-                    rbt.drive(42, SAFESPEED);
-                    rbt.turn(-40,SAFESPEED);
+                    rbt.turn(-50, -SAFESPEED);
+                    rbt.drive(40, SAFESPEED);
+                    rbt.turn(-35,SAFESPEED);
+                    rbt.drive(11,SAFESPEED);
                 }
 
                 break;
@@ -223,20 +227,26 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-12, SAFESPEED);
 
                 if(crater) {
-                    rbt.turn(45,SAFESPEED);
-                    rbt.drive(33,SAFESPEED);
-                    rbt.turn(45,SAFESPEED);
-                    rbt.drive(5,SAFESPEED);
-                    //place marker in this spot
-                    rbt.drive(-15,SAFESPEED);
-                    rbt.turn(180,SAFESPEED);
-                    rbt.drive(8,SAFESPEED);
+
+
+                    rbt.turn(-70,SAFESPEED);
+                    rbt.drive(10,0.1);
+
+                    //for placing team marker
+//                    rbt.turn(45,SAFESPEED);
+//                    rbt.drive(33,SAFESPEED);
+//                    rbt.turn(45,SAFESPEED);
+//                    rbt.drive(5,SAFESPEED);
+//                    //place marker in this spot
+//                    rbt.drive(-15,SAFESPEED);
+//                    rbt.turn(180,SAFESPEED);
+//                    rbt.drive(8,SAFESPEED);
                 } else {
                     rbt.turn(-120, SAFESPEED);
                     rbt.drive(43, SAFESPEED);
                     rbt.turn(-45,SAFESPEED);
-                    rbt.drive(18,SAFESPEED);
-                    rbt.owTurn(25, -SAFESPEED);
+                    rbt.drive(20,SAFESPEED);
+                    rbt.owTurn(17,-SAFESPEED);
                 }
 
                 break;
@@ -250,18 +260,22 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-8, SAFESPEED);
 
                 if(crater) {
-                    //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
-                    rbt.turn(85.5,SAFESPEED);
-                    rbt.drive(45,SAFESPEED);
-                    rbt.turn(45,SAFESPEED);
-                    //place marker in this spot
-                    rbt.drive(-10,SAFESPEED);
-                    rbt.turn(180 ,SAFESPEED);
-                    rbt.drive(15,SAFESPEED);
+
+                    rbt.drive(5,0.1);
+
+//                    rbt.turn(85.5,SAFESPEED);
+//                    rbt.drive(45,SAFESPEED);
+//                    rbt.turn(45,SAFESPEED);
+//                    //place marker in this spot
+//                    rbt.drive(-10,SAFESPEED);
+//                    rbt.turn(180 ,SAFESPEED);
+//                    rbt.drive(15,SAFESPEED);
                 } else {
-                    rbt.turn(-90, SAFESPEED);
+                    rbt.turn(-85, SAFESPEED);
                     rbt.drive(50, SAFESPEED);
-                    rbt.turn(-38,SAFESPEED);
+                    rbt.turn(-40,SAFESPEED);
+                    rbt.drive(8,SAFESPEED);
+//                    rbt.turn();
                 }
 
                 break;
