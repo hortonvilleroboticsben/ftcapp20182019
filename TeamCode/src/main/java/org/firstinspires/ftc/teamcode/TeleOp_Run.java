@@ -27,6 +27,7 @@ public class TeleOp_Run extends LinearOpMode {
     boolean conveyor = false;
     boolean conveyorOS = false;
     double conveyorSpeed = 0.5;
+    Timer conveyorSpeedTimer = new Timer();
     Telemetry.Item encVol;
 
     String srvColL = "srvColL", srvColR = "srvColR", srvLock = "srvLock";
@@ -134,8 +135,53 @@ public class TeleOp_Run extends LinearOpMode {
             r.setPower("mtrDeposition", Math.abs(gamepad2.right_stick_y) < 0.05 && !gamepad2.right_stick_button ? 0 : gamepad2.right_stick_y);
 
             /*
-            //TODO Rest Of Sections for Controller 2
+            Collection System
+
+            DPad Up         -       Output Minerals from Chamber
+            DPad Down       -       Input Minerals to Chamber
+            DPad Left       -       Output Minerals from Conveyor
+            DPad Right      -       Input Minerals to Conveyor
             */
+
+            if(gamepad2.dpad_up){
+                r.setServoPower("srvColR", 1);
+                r.setServoPower("srvColL", -1);
+            }else if(gamepad2.dpad_down){
+                r.setServoPower("srvColR", -1);
+                r.setServoPower("srvColL", 1);
+            }else{
+                r.setServoPower("srvColR", 0);
+                r.setServoPower("srvColL", 0);
+            }
+
+            if(gamepad2.dpad_right) r.setServoPower("srvFlick", -1);
+            else if(gamepad2.dpad_left) r.setServoPower("srvFlick", 1);
+            else r.setServoPower("srvFlick", 0);
+
+            /*
+            Conveyor System
+
+            B (One Shot)        -       Toggle On/Off for the Conveyor Belt
+            Y (Trigger 200ms)   -       Conveyor Speed Up (5%)
+            A (Trigger 200ms)   -       Conveyor Speed Down (5%)
+
+            Default speed at 50%
+            */
+
+            if(gamepad2.b && !gamepad2.start && !gamepad1.start && !conveyorOS){
+                conveyor = true;
+                conveyorOS = true;
+            }else if(!gamepad2.b) conveyorOS = false;
+
+            if(gamepad2.y && conveyorSpeedTimer.hasTimeElapsed(200)){
+                conveyorSpeed+=0.05;
+                conveyorSpeedTimer.reset();
+            }else if(gamepad2.a && !gamepad2.start && !gamepad1.start && conveyorSpeedTimer.hasTimeElapsed(200)){
+                conveyorSpeed-=0.05;
+                conveyorSpeedTimer.reset();
+            }
+
+            r.setPower("mtrConveyor", conveyor ? (conveyorSpeed = conveyorSpeed > 1 ? 1 : conveyorSpeed < 0 ? 0 : conveyorSpeed) : 0);
 
             //UPDATING TELEMETRY FOR THE USER
 
@@ -145,7 +191,10 @@ public class TeleOp_Run extends LinearOpMode {
             telemetry.addData("rightBlue", r.getColorValue("colorRight", "blue"));
 
             telemetry.addData("isLocked", isLocked);
-            telemetry.addData("srvLock Position", ((Servo) r.servos.get("srvLock")).getPosition());
+
+            telemetry.addData("Conveyor Speed", conveyorSpeed);
+            telemetry.addData("Conveyor Running", conveyor);
+
             for(Object s : r.motors.keySet()){
                 telemetry.addData((String) s, r.getPower((String)s));
                 telemetry.addData((String) s + " enc", r.getEncoderCounts((String) s));
