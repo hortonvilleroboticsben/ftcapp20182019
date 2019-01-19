@@ -21,7 +21,8 @@ public class FinalRobotConfiguration extends RobotConfiguration {
     private static String[][] servos = {
             {"srvLock"},
             {"srvColL","continuous"},
-            {"srvColR","continuous"}
+            {"srvColR","continuous"},
+            {"srvFlick","continuous"}
     };
     private static String[][] sensors = {
             {"colorLeft", "3c"},
