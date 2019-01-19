@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name="TeleOp", group="competition")
-public class MasterTeleOp extends LinearOpMode {
+public class TeleOp_Test extends LinearOpMode {
 
     Robot r = Robot.getInstance(this, new FinalRobotConfiguration());
 
