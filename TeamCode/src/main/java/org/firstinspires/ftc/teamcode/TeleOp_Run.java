@@ -23,8 +23,10 @@ public class TeleOp_Run extends LinearOpMode {
     public final double LOCKCLOSED = 0.112;
     public final double LOCKOPEN = 0.536;
     boolean lockOS = false;
-    double srvPos = 0;
-//    double posLocked = 0, posOpen = 1;
+    double drivePowerScale = 1;
+    boolean conveyor = false;
+    boolean conveyorOS = false;
+    double conveyorSpeed = 0.5;
     Telemetry.Item encVol;
 
     String srvColL = "srvColL", srvColR = "srvColR", srvLock = "srvLock";
@@ -52,8 +54,32 @@ public class TeleOp_Run extends LinearOpMode {
             //CONTROLLER 1
             //CONTROLLER 1
 
-            r.setDrivePower(Math.abs(gamepad1.left_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.3 : 1) * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) >= 0.05 ? (gamepad1.right_bumper ? 0.3 : 1) * gamepad1.right_stick_y : 0);
+            /*
+            Tank Drive Controls
+            Configured for Left-Handed Drivers
+
+
+            Left Stick      -       Left Power
+            Right Stick     -       Right Power
+            L. Stick Button -       Cut Left Power
+            R. Stick Button -       Cut Right Power
+            Left Trigger    -       25% Drive Power
+            Left Bumper     -       50% Drive Power
+             */
+
+            drivePowerScale = gamepad1.left_trigger >= 0.5 ? 0.25 : gamepad1.left_bumper ? 0.5 : 1;
+
+            r.setDrivePower(Math.abs(gamepad1.left_stick_y) < 0.05 && !gamepad1.left_stick_button ? drivePowerScale * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) < 0.05 && !gamepad1.right_stick_button ? drivePowerScale * gamepad1.right_stick_y : 0);
             r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
+
+            /*
+            Lock Controls
+
+            X (One Shot)    -       Toggle Lock/Unlock
+
+            If Lock is left Unlocked, automatic Lock control is disabled.
+            Re-Locking enables automatic Lock Control.
+             */
 
             if(gamepad1.x && !lockOS){
                 lockOS = true;
@@ -66,33 +92,50 @@ public class TeleOp_Run extends LinearOpMode {
                 r.setServoPosition("srvLock",LOCKOPEN);
             }
 
+            /*
+            Lift Controls
+
+            DPad Up         -       Lift Move Up
+            DPad Down       -       Lift Move Down
+
+            Automatic Lock Controls
+
+            Start of Lift Motion Unlocks the Lift
+            End of Lift Motion Locks the Lift
+            Disabled by manually Unlocking the Lift
+            Enabled by manually Locking the Lift
+            */
+
+            if(isLocked && (gamepad1.dpad_up || gamepad1.dpad_down))r.setServoPosition("srvLock", LOCKOPEN);
+
+            if(isLocked && !gamepad1.dpad_up && !gamepad1.dpad_down)r.setServoPosition("srvLock", LOCKCLOSED);
+
+            r.setPower("mtrLift", gamepad1.dpad_up ? .72 : gamepad1.dpad_down ? -.72 : 0);
+
             //CONTROLLER 2
             //CONTROLLER 2
 
-//            r.setPower("mtrCrane",gamepad2.left_stick_y);
-//            r.setPower("mtrLin",gamepad2.right_stick_y);
-//            if(gamepad2.right_trigger > .5) {
-//                r.setServoPower(srvColL,1);
-//                r.setServoPower(srvColR,-1);
-//            } else if(gamepad2.right_bumper) {
-//                r.setServoPower(srvColL,-1);
-//                r.setServoPower(srvColR,1);
-//            } else {
-//                r.setServoPower(srvColL,0);
-//                r.setServoPower(srvColR,0);
-//            }
+            /*
+            Collection Extension Control
 
-//            if (gamepad1.left_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
-//                srvPos = srvPos < 1 ? srvPos + 0.008 : 1;
-//                srvTimer.reset();
-//            } else if (gamepad1.right_trigger >= 0.5 && srvTimer.getTimeElapsed() >= 20) {
-//                srvPos = srvPos > 0 ? srvPos - 0.008 : 0;
-//                srvTimer.reset();
-//            }
+            Left Stick Y    -       Move Collection System
+            L. Stick Button -       Stop Collection System
+            */
 
+            r.setPower("mtrCollection", Math.abs(gamepad2.left_stick_y) < 0.05 && !gamepad2.left_stick_button ? 0 : gamepad2.left_stick_y);
 
-//            r.setServoPosition("srvLock", srvPos);
+            /*
+            Deposition Extension Control
 
+            Right Stick Y   -       Move Deposition System
+            R. Stick Button -       Stop Deposition System
+            */
+
+            r.setPower("mtrDeposition", Math.abs(gamepad2.right_stick_y) < 0.05 && !gamepad2.right_stick_button ? 0 : gamepad2.right_stick_y);
+
+            /*
+            //TODO Rest Of Sections for Controller 2
+            */
 
             //UPDATING TELEMETRY FOR THE USER
 
