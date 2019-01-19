@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.hortonvillerobotics.FinalRobotConfiguration;
 import com.hortonvillerobotics.Robot;
 import com.hortonvillerobotics.StateMachine;
+import com.hortonvillerobotics.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -101,7 +102,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                     rbt.setPower("mtrLift", 0.72);
                     sleep(2500);
-                    while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 20) > 50) ;
+                    while (rbt.calculateVelocity(() -> rbt.getEncoderCounts("mtrLift"), 50) > 50) ;
                     rbt.setServoPosition("srvLock", LOCKCLOSED);
                     rbt.runToTarget("mtrLift", -600, -.72);
 //                    rbt.initRunDriveToTarget(2000,.5,2000,.5);
@@ -128,13 +129,14 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.pause(50);
 
                     //TODO THIS VALUE MAY NEED TO BE ALTERED FOR THE DISTANCE
-                    rbt.drive(4, SAFESPEED);
+                    rbt.drive(6, SAFESPEED);
                     rbt.pause(50);
 
                     rbt.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rbt.setDrivePower(0.08, 0.08);
+                    rbt.setDrivePower(0.07, 0.07);
+                    Timer t1 = new Timer();
                     try {
-                        while (opModeIsActive() && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
+                        while (opModeIsActive() && !t1.hasTimeElapsed(2000) && !(rbt.getPower("mtrLeftDrive") == 0 && rbt.getPower("mtrRightDrive") == 0)) {
 
                             leftBlue = rbt.getColorValue("colorLeft", "blue");
                             leftRed = rbt.getColorValue("colorLeft", "red");
@@ -150,7 +152,7 @@ public class MasterAutonomous extends LinearOpMode {
 
                             if ((leftRed != null && leftRed >= 5) || (leftBlue != null && leftBlue >= 5))
                                 rbt.setPower("mtrLeftDrive", 0.0);
-                            if ((rightRed != null && rightRed >= 6) || (rightBlue != null && rightBlue >= 5))
+                            if ((rightRed != null && rightRed >= 6) || (rightBlue != null && rightBlue >= 4))
                                 rbt.setPower("mtrRightDrive", 0.0);
                         }
                     } catch (NullPointerException e) {
@@ -185,19 +187,26 @@ public class MasterAutonomous extends LinearOpMode {
 
                 rbt.turn(-35, SAFESPEED);
                 rbt.pause(50);
-                rbt.drive(23.5, SAFESPEED);
-                rbt.pause(50);
-                rbt.drive(-9, SAFESPEED);
 
                 if(crater) {
-                    //TODO IMPLEMENT STUFF FOR THE CRATER ON RIGHT BLOCK
-                    //
-                    rbt.turn(123,SAFESPEED);
+                    rbt.drive(25.5, SAFESPEED);
+                    rbt.pause(50);
+                    rbt.drive(-10, SAFESPEED);
+
+                    rbt.pause(50);
+                    rbt.turn(122.5,SAFESPEED);
                     rbt.drive(55,SAFESPEED);
+                    rbt.turn(40,SAFESPEED);
+                    rbt.pause(50);
                     //place marker in this spot
-                    rbt.drive(-20,SAFESPEED);
-                    rbt.turn(180,SAFESPEED);
+                    rbt.drive(-13,SAFESPEED);
+                    rbt.turn(188,SAFESPEED);
+                    rbt.drive(11,SAFESPEED);
                 } else {
+                    rbt.drive(23.5, SAFESPEED);
+                    rbt.pause(50);
+                    rbt.drive(-9, SAFESPEED);
+
                     rbt.turn(-53, -SAFESPEED);
                     rbt.drive(42, SAFESPEED);
                     rbt.turn(-40,SAFESPEED);
@@ -214,14 +223,14 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.drive(-12, SAFESPEED);
 
                 if(crater) {
-                    //TODO IMPLEMENT STUFF FOR THE CRATER ON LEFT BLOCK
                     rbt.turn(45,SAFESPEED);
                     rbt.drive(33,SAFESPEED);
                     rbt.turn(45,SAFESPEED);
-                    rbt.drive(10,SAFESPEED);
+                    rbt.drive(5,SAFESPEED);
                     //place marker in this spot
-                    rbt.drive(-20,SAFESPEED);
+                    rbt.drive(-15,SAFESPEED);
                     rbt.turn(180,SAFESPEED);
+                    rbt.drive(8,SAFESPEED);
                 } else {
                     rbt.turn(-120, SAFESPEED);
                     rbt.drive(43, SAFESPEED);
@@ -242,13 +251,13 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     //TODO IMPLEMENT STUFF FOR THE CRATER ON THE MIDDLE/ERROR BLOCK
-                    rbt.turn(90,SAFESPEED);
+                    rbt.turn(85.5,SAFESPEED);
                     rbt.drive(45,SAFESPEED);
-                    rbt.turn(38,SAFESPEED);
-                    rbt.drive(15,SAFESPEED);
+                    rbt.turn(45,SAFESPEED);
                     //place marker in this spot
-                    rbt.drive(-30,SAFESPEED);
-                    rbt.turn(175,SAFESPEED);
+                    rbt.drive(-10,SAFESPEED);
+                    rbt.turn(180 ,SAFESPEED);
+                    rbt.drive(15,SAFESPEED);
                 } else {
                     rbt.turn(-90, SAFESPEED);
                     rbt.drive(50, SAFESPEED);

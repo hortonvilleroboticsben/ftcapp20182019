@@ -540,6 +540,7 @@ public class Robot<T extends RobotConfiguration> {
 
             GrayF32 blueLayer = layers.getBand(2);
             GrayF32 redLayer = layers.getBand(0);
+
             int width = blueLayer.width, height = blueLayer.height / 2;
 
             GrayF32 subImageRed = redLayer.subimage(0, height, width, redLayer.height);
@@ -551,12 +552,15 @@ public class Robot<T extends RobotConfiguration> {
                     dilated = new GrayU8(width, height),
                     eroded = new GrayU8(width, height);
 
-            float thresholdB = 175, thresholdR = 175;
+            float thresholdB = 190, thresholdR = 190;
+            BinaryImageOps.erode8(thresh, 3, eroded);
+            BinaryImageOps.dilate8(eroded, 3, dilated);
             ThresholdImageOps.threshold(subImageBlue, blue, thresholdB, false);
             ThresholdImageOps.threshold(subImageRed, red, thresholdR, false);
             BinaryImageOps.logicAnd(blue, red, thresh);
-            BinaryImageOps.erode8(thresh, 3, eroded);
-            BinaryImageOps.dilate8(eroded, 3, dilated);
+            BinaryImageOps.erode8(thresh, 5, eroded);
+            BinaryImageOps.dilate8(eroded, 5, dilated);
+
 
 
             final GrayU8 g = dilated.clone();
@@ -579,9 +583,9 @@ public class Robot<T extends RobotConfiguration> {
 
 
 
-            int requiredSize = 7250, numLarger = 0;
+            int requiredSize = 8000, numLarger = 0;
             Point2D_I32 foundPoint = null;
-//            FileUtils.writeToFile("/sizes.txt","");
+            FileUtils.writeToFile("/sizes.txt","");
             for (Contour c : contours) {
                 int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
                 if (c.external.size() == 0) continue;
@@ -595,11 +599,13 @@ public class Robot<T extends RobotConfiguration> {
                 int h = maxY - minY;
                 int size = w * h;
 
-//                FileUtils.appendToFile("/sizes.txt", size + "\r\n");
+                FileUtils.appendToFile("/sizes.txt", size + "\r\n");
+
+                Log.d(TAG,"analyzePhotoData: contoursize: " + size);
 
                 if (size > requiredSize) {
 
-                    Log.d("SIZE", size + "");
+                    Log.d(TAG, "AnalyzePhotodata: successful Contour: " + size);
 
                     int avg_x = 0, avg_y = 0;
                     for (Point2D_I32 p : c.external) {
