@@ -190,19 +190,23 @@ public class MasterAutonomous extends LinearOpMode {
 
                 if(crater) {
                     rbt.drive(25.5, SAFESPEED);
-//                    rbt.drive(-10, SAFESPEED);
-                    rbt.drive(5,SAFESPEED);
+                    rbt.drive(-10, SAFESPEED);
 
-                    // below & line 193 for dropping team marker
-//                    rbt.pause(50);
-//                    rbt.turn(122.5,SAFESPEED);
-//                    rbt.drive(55,SAFESPEED);
-//                    rbt.turn(40,SAFESPEED);
-//                    rbt.pause(50);
-//                    //place marker in this spot
-//                    rbt.drive(-13,SAFESPEED);
-//                    rbt.turn(188,SAFESPEED);
-//                    rbt.drive(11,SAFESPEED);
+                    rbt.turn(122.5,SAFESPEED);
+                    rbt.drive(55,SAFESPEED);
+                    rbt.turn(40,SAFESPEED);
+
+                    //place marker in this spot
+                    //rbt.runToTarget("mtrCollection", 1000,0.72);
+                    //rbt.setServoPower("srvColR", -1);
+                    //rbt.setServoPower("srvColL", 1);
+                    //sleep(250);
+                    //rbt.initRunToTarget("mtrCollection", 0, 0.5);
+
+                    rbt.drive(-13,SAFESPEED);
+                    rbt.turn(188,SAFESPEED);
+                    rbt.drive(11,SAFESPEED);
+
                 } else {
                     rbt.drive(23.5, SAFESPEED);
                     rbt.pause(50);
@@ -222,22 +226,27 @@ public class MasterAutonomous extends LinearOpMode {
                 rbt.turn(38, SAFESPEED);
                 rbt.pause(50);
                 rbt.drive(25, SAFESPEED);
+                rbt.drive(-12, SAFESPEED);
 
                 if(crater) {
 
-                    rbt.drive(6,0.1);
+                    rbt.turn(45,SAFESPEED);
+                    rbt.drive(33,SAFESPEED);
+                    rbt.turn(45,SAFESPEED);
 
-                    // need a reverse (-12?) then this is code for placing team marker
-//                    rbt.turn(45,SAFESPEED);
-//                    rbt.drive(33,SAFESPEED);
-//                    rbt.turn(45,SAFESPEED);
-//                    rbt.drive(5,SAFESPEED);
-//                    //place marker in this spot
-//                    rbt.drive(-15,SAFESPEED);
-//                    rbt.turn(180,SAFESPEED);
-//                    rbt.drive(8,SAFESPEED);
+                    //place marker in this spot
+                    //rbt.runToTarget("mtrCollection", 1000,0.72);
+                    //rbt.setServoPower("srvColR", -1);
+                    //rbt.setServoPower("srvColL", 1);
+                    //sleep(250);
+                    //rbt.initRunToTarget("mtrCollection", 0, 0.5);
+
+                    rbt.drive(-10,SAFESPEED);
+                    rbt.turn(180,SAFESPEED);
+                    rbt.drive(8,SAFESPEED);
+
                 } else {
-                    rbt.drive(-12, SAFESPEED);
+
                     rbt.turn(-120, SAFESPEED);
                     rbt.drive(43, SAFESPEED);
                     rbt.turn(-45,SAFESPEED);
@@ -253,25 +262,32 @@ public class MasterAutonomous extends LinearOpMode {
 
                 rbt.pause(50);
                 rbt.drive(20, SAFESPEED);
+                rbt.drive(-8,SAFESPEED);
 
                 if(crater) {
 
-                    //need a a reverse motion then this is code for placing team marker
-                    rbt.owTurn(45,-0.07);
+                    rbt.turn(85.5,SAFESPEED);
+                    rbt.drive(45,SAFESPEED);
+                    rbt.turn(45,SAFESPEED);
 
-//                    rbt.turn(85.5,SAFESPEED);
-//                    rbt.drive(45,SAFESPEED);
-//                    rbt.turn(45,SAFESPEED);
-//                    //place marker in this spot
-//                    rbt.drive(-10,SAFESPEED);
-//                    rbt.turn(180 ,SAFESPEED);
-//                    rbt.drive(15,SAFESPEED);
+                    //place marker in this spot
+                    //rbt.runToTarget("mtrCollection", 1000,0.72);
+                    //rbt.setServoPower("srvColR", -1);
+                    //rbt.setServoPower("srvColL", 1);
+                    //sleep(250);
+                    //rbt.initRunToTarget("mtrCollection", 0, 0.5);
+
+                    rbt.drive(-10,SAFESPEED);
+                    rbt.turn(180 ,SAFESPEED);
+                    rbt.drive(15,SAFESPEED);
+
                 } else {
-                    rbt.drive(-8, SAFESPEED);
+
                     rbt.turn(-85, SAFESPEED);
                     rbt.drive(50, SAFESPEED);
                     rbt.turn(-40,SAFESPEED);
                     rbt.drive(2,SAFESPEED);
+
                 }
 
                 break;
