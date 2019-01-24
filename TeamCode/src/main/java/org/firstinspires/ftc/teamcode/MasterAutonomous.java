@@ -192,7 +192,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.drive(25.5, SAFESPEED);
                     rbt.drive(-10, SAFESPEED);
 
-                    rbt.turn(122.5,SAFESPEED);
+                    rbt.turn(117,SAFESPEED);
                     rbt.drive(55,SAFESPEED);
                     rbt.turn(40,SAFESPEED);
 
@@ -203,9 +203,12 @@ public class MasterAutonomous extends LinearOpMode {
                     //sleep(250);
                     //rbt.initRunToTarget("mtrCollection", 0, 0.5);
 
-                    rbt.drive(-13,SAFESPEED);
-                    rbt.turn(188,SAFESPEED);
-                    rbt.drive(11,SAFESPEED);
+                    //knock off cube with arm after dropping off marker???
+
+                    sleep(2000);
+
+                    rbt.turn(179,SAFESPEED);
+                    rbt.drive(24,SAFESPEED);
 
                 } else {
                     rbt.drive(23.5, SAFESPEED);
@@ -215,7 +218,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.turn(-50, -SAFESPEED);
                     rbt.drive(40, SAFESPEED);
                     rbt.turn(-35,SAFESPEED);
-                    rbt.drive(11,SAFESPEED);
+                    rbt.drive(6,SAFESPEED);
 
                 }
 
@@ -231,8 +234,9 @@ public class MasterAutonomous extends LinearOpMode {
                 if(crater) {
 
                     rbt.turn(45,SAFESPEED);
-                    rbt.drive(33,SAFESPEED);
+                    rbt.drive(36,SAFESPEED);
                     rbt.turn(45,SAFESPEED);
+                    rbt.drive(3,SAFESPEED);
 
                     //place marker in this spot
                     //rbt.runToTarget("mtrCollection", 1000,0.72);
@@ -241,9 +245,10 @@ public class MasterAutonomous extends LinearOpMode {
                     //sleep(250);
                     //rbt.initRunToTarget("mtrCollection", 0, 0.5);
 
-                    rbt.drive(-10,SAFESPEED);
-                    rbt.turn(180,SAFESPEED);
-                    rbt.drive(8,SAFESPEED);
+                    sleep(2000);
+
+                    rbt.turn(175,SAFESPEED);
+                    rbt.drive(27.5,SAFESPEED);
 
                 } else {
 
@@ -251,7 +256,6 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.drive(43, SAFESPEED);
                     rbt.turn(-45,SAFESPEED);
                     rbt.drive(20,SAFESPEED);
-                    rbt.owTurn(17,-SAFESPEED);
 
                 }
 
@@ -269,6 +273,7 @@ public class MasterAutonomous extends LinearOpMode {
                     rbt.turn(85.5,SAFESPEED);
                     rbt.drive(45,SAFESPEED);
                     rbt.turn(45,SAFESPEED);
+                    rbt.drive(5,SAFESPEED);
 
                     //place marker in this spot
                     //rbt.runToTarget("mtrCollection", 1000,0.72);
@@ -277,16 +282,17 @@ public class MasterAutonomous extends LinearOpMode {
                     //sleep(250);
                     //rbt.initRunToTarget("mtrCollection", 0, 0.5);
 
-                    rbt.drive(-10,SAFESPEED);
-                    rbt.turn(180 ,SAFESPEED);
-                    rbt.drive(15,SAFESPEED);
+                    sleep(2000);
+
+                    rbt.turn(175,SAFESPEED);
+                    rbt.drive(25,SAFESPEED);
 
                 } else {
 
                     rbt.turn(-85, SAFESPEED);
                     rbt.drive(50, SAFESPEED);
                     rbt.turn(-40,SAFESPEED);
-                    rbt.drive(2,SAFESPEED);
+                    rbt.drive(8,SAFESPEED);
 
                 }
 
