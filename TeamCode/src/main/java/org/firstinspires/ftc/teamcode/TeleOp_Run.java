@@ -65,7 +65,6 @@ public class TeleOp_Run extends LinearOpMode {
             drivePowerScale = gamepad1.left_trigger >= .5 ? 0.25 : gamepad1.left_bumper ? 0.7 : 0.4;
 
             r.setDrivePower(Math.abs(gamepad1.left_stick_y) > 0.05 && !gamepad1.left_stick_button ? drivePowerScale * gamepad1.left_stick_y : 0, Math.abs(gamepad1.right_stick_y) > 0.05 && !gamepad1.right_stick_button ? drivePowerScale * gamepad1.right_stick_y : 0);
-//            r.setPower("mtrLift", gamepad1.dpad_up ? 1 : gamepad1.dpad_down ? -1 : 0);
 
             /*
             Lock Controls
@@ -117,7 +116,7 @@ public class TeleOp_Run extends LinearOpMode {
             L. Stick Button -       Stop Collection System
             */
 
-//            r.setPower("mtrCollection", Math.abs(gamepad2.left_stick_y) < 0.05 && !gamepad2.left_stick_button ? 0 : gamepad2.left_stick_y);
+            r.setPower("mtrCollection", Math.abs(gamepad2.left_stick_y) < 0.05 && !gamepad2.left_stick_button ? 0 : gamepad2.left_stick_y);
 
             /*
             Deposition Extension Control
@@ -126,7 +125,7 @@ public class TeleOp_Run extends LinearOpMode {
             R. Stick Button -       Stop Deposition System
             */
 
-//            r.setPower("mtrDeposition", Math.abs(gamepad2.right_stick_y) < 0.05 && !gamepad2.right_stick_button ? 0 : gamepad2.right_stick_y);
+            r.setPower("mtrDeposition", Math.abs(gamepad2.right_stick_y) < 0.05 && !gamepad2.right_stick_button ? 0 : gamepad2.right_stick_y);
 
             /*
             Collection System
@@ -137,20 +136,19 @@ public class TeleOp_Run extends LinearOpMode {
             DPad Right      -       Input Minerals to Conveyor
             */
 
-//            if(gamepad2.dpad_up){
-//                r.setServoPower("srvColR", 1);
-//                r.setServoPower("srvColL", -1);
-//            }else if(gamepad2.dpad_down){
-//                r.setServoPower("srvColR", -1);
-//                r.setServoPower("srvColL", 1);
-//            }else{
-//                r.setServoPower("srvColR", 0);
-//                r.setServoPower("srvColL", 0);
-//            }
-//
-//            if(gamepad2.dpad_right) r.setServoPower("srvFlick", -1);
-//            else if(gamepad2.dpad_left) r.setServoPower("srvFlick", 1);
-//            else r.setServoPower("srvFlick", 0);
+            if(gamepad2.dpad_up){
+                r.setServoPower("srvColR", 1);
+                r.setServoPower("srvColL", -1);
+            }else if(gamepad2.dpad_down){
+                r.setServoPower("srvColR", -1);
+                r.setServoPower("srvColL", 1);
+            }else{
+                r.setServoPower("srvColR", 0);
+                r.setServoPower("srvColL", 0);
+            }
+
+            r.setServoPower("srvFlick",gamepad2.dpad_left ? 1 : gamepad2.dpad_right ? -1 : 0);
+//            r.setServoPower("srvFlick",0);
 
             /*
             Conveyor System
@@ -162,20 +160,20 @@ public class TeleOp_Run extends LinearOpMode {
             Default speed at 50%
             */
 
-//            if(gamepad2.b && !gamepad2.start && !gamepad1.start && !conveyorOS){
-//                conveyor = true;
-//                conveyorOS = true;
-//            }else if(!gamepad2.b) conveyorOS = false;
-//
-//            if(gamepad2.y && conveyorSpeedTimer.hasTimeElapsed(200)){
-//                conveyorSpeed+=0.05;
-//                conveyorSpeedTimer.reset();
-//            }else if(gamepad2.a && !gamepad2.start && !gamepad1.start && conveyorSpeedTimer.hasTimeElapsed(200)){
-//                conveyorSpeed-=0.05;
-//                conveyorSpeedTimer.reset();
-//            }
+            if(gamepad2.b && !gamepad2.start && !gamepad1.start && !conveyorOS){
+                conveyor = true;
+                conveyorOS = true;
+            }else if(!gamepad2.b) conveyorOS = false;
 
-//            r.setPower("mtrConveyor", conveyor ? (conveyorSpeed = conveyorSpeed > 1 ? 1 : conveyorSpeed < 0 ? 0 : conveyorSpeed) : 0);
+            if(gamepad2.y && conveyorSpeedTimer.hasTimeElapsed(200)){
+                conveyorSpeed+=0.05;
+                conveyorSpeedTimer.reset();
+            }else if(gamepad2.a && !gamepad2.start && !gamepad1.start && conveyorSpeedTimer.hasTimeElapsed(200)){
+                conveyorSpeed-=0.05;
+                conveyorSpeedTimer.reset();
+            }
+
+            r.setPower("mtrConveyor", conveyor ? (conveyorSpeed = conveyorSpeed > 1 ? 1 : conveyorSpeed < 0 ? 0 : conveyorSpeed) : 0);
 
             //UPDATING TELEMETRY FOR THE USER
 
