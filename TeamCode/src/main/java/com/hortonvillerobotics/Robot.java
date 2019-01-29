@@ -23,6 +23,7 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -160,15 +161,25 @@ public class Robot<T extends RobotConfiguration> {
 
     public void runParallel(@NonNull String endFlagName, @NonNull Task... tasks) {
         CountDownLatch l = new CountDownLatch(tasks.length);
+        ArrayList<Thread> threads = new ArrayList<>();
         for (Task t : tasks) {
-            new Thread(() -> {
-                t.executeTasks();
-                l.countDown();
-            }).start();
+            threads.add(new Thread(() -> {
+                try {
+                    t.executeTasks();
+                    l.countDown();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }));
+            threads.get(threads.size()-1).setName("Robot Multi-Thread Thread");
+            threads.get(threads.size()-1).start();
         }
         new Thread(() -> {
             try {
-                l.await();
+                while(l.getCount() != 0){
+                    if(opMode instanceof LinearOpMode && !((LinearOpMode) opMode).opModeIsActive() && ((LinearOpMode) opMode).isStopRequested())
+                        for(Thread t : threads) t.join();
+                }
                 flags.add(endFlagName);
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
